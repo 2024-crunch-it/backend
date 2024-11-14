@@ -1,12 +1,16 @@
 package com.crunchit.housing_subscription.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "tbl_housing_pblanc_model")
 @IdClass(HousingAnnouncementModelId.class)
 public class HousingAnnouncementModel {
@@ -64,4 +68,11 @@ public class HousingAnnouncementModel {
 
     @Column(name = "lttot_top_amount")
     private Double lttotTopAmount;
+
+    @ManyToOne
+    @JoinColumns({
+            @JoinColumn(name = "pblanc_no", referencedColumnName = "pblanc_no", insertable = false, updatable = false),
+            @JoinColumn(name = "house_manage_no", referencedColumnName = "house_manage_no", insertable = false, updatable = false)
+    })
+    private HousingAnnouncement housingAnnouncement;
 }

@@ -1,8 +1,11 @@
 package com.crunchit.housing_subscription.service;
 
 import com.crunchit.housing_subscription.dto.externalApi.response.ApiAnnouncementResponseDto;
+import com.crunchit.housing_subscription.dto.externalApi.response.ApiModelResponseDto;
 import com.crunchit.housing_subscription.dto.externalApi.response.HousingAnnouncementDto;
+import com.crunchit.housing_subscription.dto.externalApi.response.HousingModelDto;
 import com.crunchit.housing_subscription.entity.HousingAnnouncement;
+import com.crunchit.housing_subscription.entity.HousingAnnouncementModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,63 @@ public class HousingApiService {
         String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getOPTLttotPblancDetail";
 
         return getHousingAnnouncements(baseUrl, date);
+    }
+    public List<HousingAnnouncementModel> getAptModels(String houseManageNo, String pblancNo){
+        String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getAPTLttotPblancMdl";
+        return getHousingAnnouncementModels(houseManageNo, pblancNo, baseUrl);
+    }
+
+    public List<HousingAnnouncementModel> getRemainModels(String houseManageNo, String pblancNo){
+        String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getRemndrLttotPblancMdl";
+        return getHousingAnnouncementModels(houseManageNo, pblancNo, baseUrl);
+    }
+
+    public List<HousingAnnouncementModel> getOptionModels(String houseManageNo, String pblancNo){
+        String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getOPTLttotPblancDetail";
+        return getHousingAnnouncementModels(houseManageNo, pblancNo, baseUrl);
+    }
+
+    private List<HousingAnnouncementModel> getHousingAnnouncementModels(String houseManageNo, String pblancNo, String baseUrl) {
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+
+        WebClient webClient = webClientBuilder.uriBuilderFactory(factory).build();
+        List<HousingAnnouncementModel> housingModels = new ArrayList<>();
+
+        int currentPage = 1;
+        int totalPages;
+
+        do {
+            String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .queryParam("page", currentPage)
+                    .queryParam("perPage", PAGE_SIZE)
+                    .queryParam("serviceKey", secret)
+                    .queryParam("cond%5BHOUSE_MANAGE_NO%3A%3AEQ%5D", houseManageNo)
+                    .queryParam("cond%5BPBLANC_NO%3A%3AEQ%5D", pblancNo)
+                    .build(false)
+                    .toString();
+
+            ApiModelResponseDto responseDto = webClient
+                    .get()
+                    .uri(url)
+                    .retrieve()
+                    .bodyToMono(ApiModelResponseDto.class)
+                    .block();
+
+            assert responseDto != null;
+
+            int matchCount = responseDto.getMatchCount();
+            totalPages = (matchCount / PAGE_SIZE) + 1;
+
+
+            for (HousingModelDto dto : responseDto.getData()) {
+                housingModels.add(dto.toEntity());
+            }
+            currentPage++;
+
+        } while (currentPage <= totalPages);
+
+        return housingModels;
     }
 
     private List<HousingAnnouncement> getHousingAnnouncements(String baseUrl, String date) {
@@ -81,5 +141,6 @@ public class HousingApiService {
 
         return housingAnnouncements;
     }
+
 }
 
