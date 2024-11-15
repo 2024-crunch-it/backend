@@ -2,8 +2,8 @@ package com.crunchit.housing_subscription.service;
 
 import com.crunchit.housing_subscription.dto.externalApi.response.ApiAnnouncementResponseDto;
 import com.crunchit.housing_subscription.dto.externalApi.response.ApiModelResponseDto;
-import com.crunchit.housing_subscription.dto.externalApi.response.HousingAnnouncementDto;
-import com.crunchit.housing_subscription.dto.externalApi.response.HousingModelDto;
+import com.crunchit.housing_subscription.dto.externalApi.response.HousingAnnouncementApiDto;
+import com.crunchit.housing_subscription.dto.externalApi.response.HousingModelApiDto;
 import com.crunchit.housing_subscription.entity.HousingAnnouncement;
 import com.crunchit.housing_subscription.entity.HousingAnnouncementModel;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class HousingApiService {
     }
 
     public List<HousingAnnouncementModel> getOptionModels(String houseManageNo, String pblancNo){
-        String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getOPTLttotPblancDetail";
+        String baseUrl = "https://api.odcloud.kr/api/ApplyhomeInfoDetailSvc/v1/getOPTLttotPblancMdl";
         return getHousingAnnouncementModels(houseManageNo, pblancNo, baseUrl);
     }
 
@@ -90,7 +90,7 @@ public class HousingApiService {
             totalPages = (matchCount / PAGE_SIZE) + 1;
 
 
-            for (HousingModelDto dto : responseDto.getData()) {
+            for (HousingModelApiDto dto : responseDto.getData()) {
                 housingModels.add(dto.toEntity());
             }
             currentPage++;
@@ -100,7 +100,7 @@ public class HousingApiService {
         return housingModels;
     }
 
-    private List<HousingAnnouncement> getHousingAnnouncements(String baseUrl, String date) {
+    private List<HousingAnnouncement>  getHousingAnnouncements(String baseUrl, String date) {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
@@ -132,7 +132,7 @@ public class HousingApiService {
             totalPages = (matchCount / PAGE_SIZE) + 1;
 
 
-            for (HousingAnnouncementDto dto : responseDto.getData()) {
+            for (HousingAnnouncementApiDto dto : responseDto.getData()) {
                 housingAnnouncements.add(dto.toEntity());
             }
             currentPage++;

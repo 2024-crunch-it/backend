@@ -1,11 +1,13 @@
 package com.crunchit.housing_subscription.dto.externalApi.response;
 
 import com.crunchit.housing_subscription.entity.HousingAnnouncementModel;
+import com.crunchit.housing_subscription.util.CustomLongDeserializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
 @Data
-public class HousingModelDto {
+public class HousingModelApiDto {
     @JsonProperty
     private String HOUSE_MANAGE_NO; // 주택관리번호
     @JsonProperty
@@ -39,6 +41,7 @@ public class HousingModelDto {
     @JsonProperty
     private Integer NWBB_HSHLDCO; // 특별공급-신생아 세대수
     @JsonProperty
+    @JsonDeserialize(using = CustomLongDeserializer.class)
     private Long LTTOT_TOP_AMOUNT; // 공급금액 (분양최고금액) (단위:만원)
 
     public HousingAnnouncementModel toEntity() {

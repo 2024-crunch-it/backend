@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class ApiModelResponseDto {
     private Integer currentCount;
-    private List<HousingModelDto> data;
+    private List<HousingModelApiDto> data;
     private Integer matchCount;
     private Integer page;
     private Integer perPage;

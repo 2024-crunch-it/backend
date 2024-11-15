@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
-public class HousingAnnouncementDto {
+public class HousingAnnouncementApiDto {
     @JsonProperty
     private String HOUSE_MANAGE_NO;
     @JsonProperty// 주택관리번호
@@ -112,7 +112,6 @@ public class HousingAnnouncementDto {
     private String PBLANC_URL;                 // 모집공고 상세 URL
 
     public HousingAnnouncement toEntity(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return HousingAnnouncement.builder()
                 .pblancNo(this.PBLANC_NO)
                 .houseManageNo(this.HOUSE_MANAGE_NO)
@@ -128,28 +127,28 @@ public class HousingAnnouncementDto {
                 .hssplyZip(this.HSSPLY_ZIP)
                 .hssplyAdres(this.HSSPLY_ADRES)
                 .totSuplyHshldco(this.TOT_SUPLY_HSHLDCO)
-                .rcritPblancDe(parseDate(this.RCRIT_PBLANC_DE, sdf))
-                .subscrptRceptBgnde(parseDate(this.SUBSCRPT_RCEPT_BGNDE, sdf))
-                .subscrptRceptEndde(parseDate(this.SUBSCRPT_RCEPT_ENDDE, sdf))
-                .rceptBgnde(parseDate(this.RCEPT_BGNDE, sdf))
-                .rceptEndde(parseDate(this.RCEPT_ENDDE, sdf))
-                .spsplyRceptBgnde(parseDate(this.SPSPLY_RCEPT_BGNDE, sdf))
-                .spsplyRceptEndde(parseDate(this.SPSPLY_RCEPT_ENDDE, sdf))
-                .gnrlRnk1CrspareaRcptde(parseDate(this.GNRL_RNK1_CRSPAREA_RCPTDE, sdf))
-                .gnrlRnk1CrspareaEndde(parseDate(this.GNRL_RNK1_CRSPAREA_ENDDE, sdf))
-                .gnrlRnk1EtcGgRcptde(parseDate(this.GNRL_RNK1_ETC_GG_RCPTDE, sdf))
-                .gnrlRnk1EtcGgEndde(parseDate(this.GNRL_RNK1_ETC_GG_ENDDE, sdf))
-                .gnrlRnk1EtcAreaRcptde(parseDate(this.GNRL_RNK1_ETC_AREA_RCPTDE, sdf))
-                .gnrlRnk1EtcAreaEndde(parseDate(this.GNRL_RNK1_ETC_AREA_ENDDE, sdf))
-                .gnrlRnk2CrspareaRcptde(parseDate(this.GNRL_RNK2_CRSPAREA_RCPTDE, sdf))
-                .gnrlRnk2CrspareaEndde(parseDate(this.GNRL_RNK2_CRSPAREA_ENDDE, sdf))
-                .gnrlRnk2EtcGgRcptde(parseDate(this.GNRL_RNK2_ETC_GG_RCPTDE, sdf))
-                .gnrlRnk2EtcGgEndde(parseDate(this.GNRL_RNK2_ETC_GG_ENDDE, sdf))
-                .gnrlRnk2EtcAreaRcptde(parseDate(this.GNRL_RNK2_ETC_AREA_RCPTDE, sdf))
-                .gnrlRnk2EtcAreaEndde(parseDate(this.GNRL_RNK2_ETC_AREA_ENDDE, sdf))
-                .przwnerPresnatnDe(parseDate(this.PRZWNER_PRESNATN_DE, sdf))
-                .cntrctCnclsBgnde(parseDate(this.CNTRCT_CNCLS_BGNDE, sdf))
-                .cntrctCnclsEndde(parseDate(this.CNTRCT_CNCLS_ENDDE, sdf))
+                .rcritPblancDe(parseDate(this.RCRIT_PBLANC_DE))
+                .subscrptRceptBgnde(parseDate(this.SUBSCRPT_RCEPT_BGNDE))
+                .subscrptRceptEndde(parseDate(this.SUBSCRPT_RCEPT_ENDDE))
+                .rceptBgnde(parseDate(this.RCEPT_BGNDE))
+                .rceptEndde(parseDate(this.RCEPT_ENDDE))
+                .spsplyRceptBgnde(parseDate(this.SPSPLY_RCEPT_BGNDE))
+                .spsplyRceptEndde(parseDate(this.SPSPLY_RCEPT_ENDDE))
+                .gnrlRnk1CrspareaRcptde(parseDate(this.GNRL_RNK1_CRSPAREA_RCPTDE))
+                .gnrlRnk1CrspareaEndde(parseDate(this.GNRL_RNK1_CRSPAREA_ENDDE))
+                .gnrlRnk1EtcGgRcptde(parseDate(this.GNRL_RNK1_ETC_GG_RCPTDE))
+                .gnrlRnk1EtcGgEndde(parseDate(this.GNRL_RNK1_ETC_GG_ENDDE))
+                .gnrlRnk1EtcAreaRcptde(parseDate(this.GNRL_RNK1_ETC_AREA_RCPTDE))
+                .gnrlRnk1EtcAreaEndde(parseDate(this.GNRL_RNK1_ETC_AREA_ENDDE))
+                .gnrlRnk2CrspareaRcptde(parseDate(this.GNRL_RNK2_CRSPAREA_RCPTDE))
+                .gnrlRnk2CrspareaEndde(parseDate(this.GNRL_RNK2_CRSPAREA_ENDDE))
+                .gnrlRnk2EtcGgRcptde(parseDate(this.GNRL_RNK2_ETC_GG_RCPTDE))
+                .gnrlRnk2EtcGgEndde(parseDate(this.GNRL_RNK2_ETC_GG_ENDDE))
+                .gnrlRnk2EtcAreaRcptde(parseDate(this.GNRL_RNK2_ETC_AREA_RCPTDE))
+                .gnrlRnk2EtcAreaEndde(parseDate(this.GNRL_RNK2_ETC_AREA_ENDDE))
+                .przwnerPresnatnDe(parseDate(this.PRZWNER_PRESNATN_DE))
+                .cntrctCnclsBgnde(parseDate(this.CNTRCT_CNCLS_BGNDE))
+                .cntrctCnclsEndde(parseDate(this.CNTRCT_CNCLS_ENDDE))
                 .hmpgAdres(this.HMPG_ADRES)
                 .cnstrctEntrpsNm(this.CNSTRCT_ENTRPS_NM)
                 .mdhsTelno(this.MDHS_TELNO)
@@ -165,9 +164,18 @@ public class HousingAnnouncementDto {
                 .publicHouseSpclmApplcApt(this.PUBLIC_HOUSE_SPCLM_APPLC_APT)
                 .pblancUrl(this.PBLANC_URL).build();
     }
-    private Date parseDate(String dateStr, SimpleDateFormat sdf) {
+    private Date parseDate(String dateStr) {
+        if (dateStr == null) return null;
+
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            return dateStr != null ? sdf.parse(dateStr) : null;
+            return sdf1.parse(dateStr);
+        } catch (ParseException ignored) {
+
+        }
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+        try {
+            return sdf2.parse(dateStr);
         } catch (ParseException e) {
             return null;
         }
