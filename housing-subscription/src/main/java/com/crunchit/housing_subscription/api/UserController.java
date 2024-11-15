@@ -30,13 +30,14 @@ public class UserController {
     }
 
 
-//    @Operation(summary = "청약 납입 수 증가", description = "사용자의 청약 납입 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
-//    @PostMapping("/deposit")
-//    public void incrementDeposit(
-//            @Parameter(description = "사용자 ID")
-//            @RequestParam(name = "userId") Long userId) {
-//        badgeService.incrementDeposit(userId);
-//    }
+    @Operation(summary = "청약 납입 수 증가", description = "사용자의 청약 납입 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
+    @PostMapping("/deposit")
+    public void incrementDeposit(
+            @Parameter(description = "사용자 ID")
+            @RequestParam(name = "userId") Long userId) {
+        badgeService.incrementDeposit(userId);
+    }
+
 //
 //    @Operation(summary = "청약 정보 찜 수 증가", description = "사용자의 청약 정보 찜 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
 //    @PostMapping("/bookmark")

@@ -74,6 +74,40 @@ public class BadgeService {
         }
     }
 
+    // 청약 납입 호출 메서드
+    public void incrementDeposit(Long userId) {
+        String eventKey = "user:" + userId + ":deposit";
+        String dbCountKey = "user:" + userId + ":dbDeposit";
+
+        ValueOperations<String, Integer> operations = redisTemplate.opsForValue();
+
+        // Redis에서 납입 횟수 증가
+        Integer redisDepositCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
+
+        // dbCountKey 값이 없다면 DB에서 조회하여 초기화
+        Integer dbDepositCount = operations.get(dbCountKey);
+        if (dbDepositCount == null) {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            dbDepositCount = user.getDepositCount(); // depositCount 조회
+            operations.set(dbCountKey, dbDepositCount, 1, TimeUnit.DAYS); // 하루 동안 유지
+        }
+
+        // DB와 Redis의 납입 횟수 합산
+        int totalDepositCount = Optional.ofNullable(dbDepositCount).orElse(0) + redisDepositCount;
+
+        // 뱃지 확인 및 할당
+        checkAndAssignBadge(userId, totalDepositCount, "deposit");
+
+        // 조건 만족 시 DB와 Redis의 dbCountKey를 업데이트
+        if (totalDepositCount == 1 || totalDepositCount == 10 || totalDepositCount == 50 || totalDepositCount == 100) {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            user.setDepositCount(totalDepositCount); // depositCount 업데이트
+            userRepository.save(user);
+            operations.set(dbCountKey, totalDepositCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
+            redisTemplate.delete(eventKey); // event_count 초기화
+        }
+    }
+
     private void checkAndAssignBadge(Long userId, int count, String type) {
         // 모든 뱃지 조회
         List<Badge> badges = badgeRepository.findAll();
@@ -94,7 +128,17 @@ public class BadgeService {
                         shouldAssignBadge = true;
                     }
                     break;
-                // 다른 타입 조건 추가 가능 (예: deposit, bookmark 등)
+                case "deposit": // deposit 조건 추가
+                    if (badge.getBadgeName().equals("첫 저축") && count == 1) {
+                        shouldAssignBadge = true;
+                    } else if (badge.getBadgeName().equals("저축의 시작") && count == 10) {
+                        shouldAssignBadge = true;
+                    } else if (badge.getBadgeName().equals("꾸준한 저축가") && count == 50) {
+                        shouldAssignBadge = true;
+                    } else if (badge.getBadgeName().equals("저축의 달인") && count == 100) {
+                        shouldAssignBadge = true;
+                    }
+                    break;
             }
 
             // 조건을 만족하면 뱃지를 사용자에게 할당
