@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,26 @@ public class User {
     @Column(name = "user_name", nullable = false)
     private String userName;
 
+    @Column(name = "page_visit_count", nullable = false)
+    private int pageVisitCount;
+
+    @Column(name = "deposit_count", nullable = false)
+    private int depositCount;
+
+    @Column(name = "bookmark_count", nullable = false)
+    private int bookmarkCount;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserBadge> userBadges = new HashSet<>();
+
+    // 연관관계 관리 메서드
+    public void addBadge(Badge badge) {
+        // 중복 검사 후 새로운 뱃지 추가
+        if (userBadges.stream().noneMatch(userBadge -> userBadge.getBadge().equals(badge))) {
+            UserBadge userBadge = new UserBadge();
+            userBadge.setUser(this); // 연관 설정
+            userBadge.setBadge(badge); // 연관 설정
+            this.userBadges.add(userBadge);
+        }
+    }
 }
