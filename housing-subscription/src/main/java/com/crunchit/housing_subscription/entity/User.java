@@ -26,14 +26,14 @@ public class User {
     @Column(name = "page_visit_count", nullable = false)
     private int pageVisitCount;
 
-    @Column(name = "deposit_count", nullable = false)
-    private int depositCount;
-
     @Column(name = "bookmark_count", nullable = false)
     private int bookmarkCount;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserBadge> userBadges = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Account> accounts = new HashSet<>();
 
     // 연관관계 관리 메서드
     public void addBadge(Badge badge) {

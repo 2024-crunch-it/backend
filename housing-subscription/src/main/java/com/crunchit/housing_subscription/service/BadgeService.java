@@ -2,8 +2,10 @@ package com.crunchit.housing_subscription.service;
 
 import com.crunchit.housing_subscription.dto.response.BadgeDto;
 import com.crunchit.housing_subscription.dto.response.UserResponseDto;
+import com.crunchit.housing_subscription.entity.Account;
 import com.crunchit.housing_subscription.entity.Badge;
 import com.crunchit.housing_subscription.entity.User;
+import com.crunchit.housing_subscription.repository.AccountRepository;
 import com.crunchit.housing_subscription.repository.BadgeRepository;
 import com.crunchit.housing_subscription.repository.UserBadgeRepository;
 import com.crunchit.housing_subscription.repository.UserRepository;
@@ -24,7 +26,7 @@ public class BadgeService {
 
     private final UserRepository userRepository;
     private final BadgeRepository badgeRepository;
-    private final UserBadgeRepository userBadgeRepository;
+    private final AccountRepository accountRepository;
     private final RedisTemplate<String, Integer> redisTemplate;
 
     @Transactional(readOnly = true)
@@ -75,20 +77,27 @@ public class BadgeService {
     }
 
     // 청약 납입 호출 메서드
-    public void incrementDeposit(Long userId) {
-        String eventKey = "user:" + userId + ":deposit";
-        String dbCountKey = "user:" + userId + ":dbDeposit";
+    public void incrementDeposit(Long userId, Long accountId, int depositAmount) {
+        // Redis 키 구성
+        String eventKey = "account:" + accountId + ":deposit";
+        String dbCountKey = "account:" + accountId + ":dbDeposit";
 
         ValueOperations<String, Integer> operations = redisTemplate.opsForValue();
+
+        // 계좌 조회 및 유효성 확인
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        if (!account.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Account does not belong to the user");
+        }
 
         // Redis에서 납입 횟수 증가
         Integer redisDepositCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
 
-        // dbCountKey 값이 없다면 DB에서 조회하여 초기화
+        // dbCountKey 값이 없다면 DB에서 초기화
         Integer dbDepositCount = operations.get(dbCountKey);
         if (dbDepositCount == null) {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-            dbDepositCount = user.getDepositCount(); // depositCount 조회
+            dbDepositCount = account.getDepositCount(); // account 테이블에서 납입 횟수 조회
             operations.set(dbCountKey, dbDepositCount, 1, TimeUnit.DAYS); // 하루 동안 유지
         }
 
@@ -100,12 +109,14 @@ public class BadgeService {
 
         // 조건 만족 시 DB와 Redis의 dbCountKey를 업데이트
         if (totalDepositCount == 1 || totalDepositCount == 10 || totalDepositCount == 50 || totalDepositCount == 100) {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-            user.setDepositCount(totalDepositCount); // depositCount 업데이트
-            userRepository.save(user);
+            account.setDepositCount(totalDepositCount); // 납입 횟수 업데이트
             operations.set(dbCountKey, totalDepositCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
             redisTemplate.delete(eventKey); // event_count 초기화
         }
+
+        // 잔액 업데이트
+        account.setBalance(account.getBalance() + depositAmount);
+        accountRepository.save(account);
     }
 
     private void checkAndAssignBadge(Long userId, int count, String type) {

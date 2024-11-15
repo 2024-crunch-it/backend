@@ -30,12 +30,12 @@ public class UserController {
     }
 
 
-    @Operation(summary = "청약 납입 수 증가", description = "사용자의 청약 납입 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
+    @Operation(summary = "청약 납입", description = "사용자의 청약 납입 횟수를 1 증가시키고, 금액 납입, 조건 충족 시 뱃지 지급")
     @PostMapping("/deposit")
     public void incrementDeposit(
-            @Parameter(description = "사용자 ID")
-            @RequestParam(name = "userId") Long userId) {
-        badgeService.incrementDeposit(userId);
+            @Parameter(description = "사용자 ID, 계좌 ID, 납입 금액")
+            @RequestParam(name = "userId") Long userId, Long accountId, int depositAmount) {
+        badgeService.incrementDeposit(userId, accountId, depositAmount);
     }
 
 //
