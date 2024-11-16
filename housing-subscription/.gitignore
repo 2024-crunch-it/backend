@@ -41,3 +41,5 @@ out/
 
 # macOS 시스템 파일 무시
 .DS_Store
+
+/src/main/resources/firebase/housing-subscription-firebase-adminsdk-vczg6-b33958d56b.json
