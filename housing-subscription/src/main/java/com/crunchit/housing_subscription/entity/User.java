@@ -35,6 +35,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Account> accounts = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserSubscriptionLike> likes = new HashSet<>();
+
     // 연관관계 관리 메서드
     public void addBadge(Badge badge) {
         // 중복 검사 후 새로운 뱃지 추가

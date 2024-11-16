@@ -27,7 +27,7 @@ public class BadgeService {
     private final UserRepository userRepository;
     private final BadgeRepository badgeRepository;
     private final AccountRepository accountRepository;
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional(readOnly = true)
     public UserResponseDto getUserWithBadges(Long userId) {
@@ -49,13 +49,13 @@ public class BadgeService {
         String eventKey = "user:" + userId + ":pageVisit";
         String dbCountKey = "user:" + userId + ":dbPageVisit";
 
-        ValueOperations<String, Integer> operations = redisTemplate.opsForValue();
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
 
         // Redis에서 방문 횟수 증가
         Integer redisVisitCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
 
         // dbCountKey 값이 없다면 DB에서 조회하여 초기화
-        Integer dbVisitCount = operations.get(dbCountKey);
+        Integer dbVisitCount = (Integer) operations.get(dbCountKey);
         if (dbVisitCount == null) {
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             dbVisitCount = user.getPageVisitCount();
@@ -82,7 +82,7 @@ public class BadgeService {
         String eventKey = "account:" + accountId + ":deposit";
         String dbCountKey = "account:" + accountId + ":dbDeposit";
 
-        ValueOperations<String, Integer> operations = redisTemplate.opsForValue();
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
 
         // 계좌 조회 및 유효성 확인
         Account account = accountRepository.findById(accountId)
@@ -95,7 +95,7 @@ public class BadgeService {
         Integer redisDepositCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
 
         // dbCountKey 값이 없다면 DB에서 초기화
-        Integer dbDepositCount = operations.get(dbCountKey);
+        Integer dbDepositCount = (Integer) operations.get(dbCountKey);
         if (dbDepositCount == null) {
             dbDepositCount = account.getDepositCount(); // account 테이블에서 납입 횟수 조회
             operations.set(dbCountKey, dbDepositCount, 1, TimeUnit.DAYS); // 하루 동안 유지
