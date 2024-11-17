@@ -3,9 +3,7 @@ package com.crunchit.housing_subscription.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity // 복합키 클래스 참조
 @Getter
@@ -170,4 +168,7 @@ public class HousingAnnouncement {
 
     @OneToMany(mappedBy = "housingAnnouncement", cascade = CascadeType.ALL)
     private List<HousingAnnouncementModel> models = new ArrayList<>();
+
+    @OneToMany(mappedBy = "housingAnnouncement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserSubscriptionLike> likes = new HashSet<>();
 }
