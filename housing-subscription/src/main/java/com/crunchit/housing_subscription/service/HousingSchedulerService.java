@@ -20,7 +20,7 @@ public class HousingSchedulerService {
 
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void scheduledScrap(){
-        String previousDate = getPreviousDate()
+        String previousDate = getPreviousDate();
         List<HousingAnnouncement> announcements = apiService.getAptAnnouncements(previousDate);
         insertService.insertHousingAnnouncements(announcements);
         for(HousingAnnouncement announcement: announcements){
