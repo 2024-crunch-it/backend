@@ -146,7 +146,7 @@ public class BadgeService {
                 });
 
         // DB와 Redis의 사용 횟수를 합산
-        int totalUsageCount = dbUsageCount + redisUsageCount;
+        int totalUsageCount = dbUsageCount + redisUsageCount+1;
 
 
         // 10번 조건 체크 및 뱃지 수여
@@ -156,6 +156,49 @@ public class BadgeService {
             // DB 업데이트 및 Redis 초기화
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             user.setCalendarUsageCount(totalUsageCount);
+            userRepository.save(user);
+
+            operations.set(dbCountKey, totalUsageCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
+            redisTemplate.delete(eventKey); // event_count 초기화
+        }
+    }
+
+    @Transactional
+    public void incrementCustomAlertUsage(Long userId) {
+        String eventKey = "user:" + userId + ":customAlertUsage";
+        String dbCountKey = "user:" + userId + ":dbCustomAlertUsage";
+
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+
+        // Redis에서 캘린더 사용 횟수 증가
+        Integer redisUsageCount = Optional.ofNullable(operations.get(eventKey))
+                .map(Object::toString)
+                .map(Integer::valueOf)
+                .orElse(0);
+
+        operations.increment(eventKey, 1); // Redis에서 1 증가
+
+        // dbCountKey 값이 없다면 DB에서 조회하여 초기화
+        Integer dbUsageCount = Optional.ofNullable(operations.get(dbCountKey))
+                .map(Object::toString)
+                .map(Integer::valueOf)
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+                    int count = user.getCustomAlertUsageCount();
+                    operations.set(dbCountKey, count, 1, TimeUnit.DAYS); // 하루 동안 유지
+                    return count;
+                });
+
+        // DB와 Redis의 사용 횟수를 합산
+        int totalUsageCount = dbUsageCount + redisUsageCount +1;
+
+        // 조건 만족 시 DB 업데이트 및 Redis 초기화
+        if (totalUsageCount == 10) {
+            checkAndAssignBadge(userId, totalUsageCount, "alert");
+
+            // DB 업데이트 및 Redis 초기화
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            user.setCustomAlertUsageCount(totalUsageCount);
             userRepository.save(user);
 
             operations.set(dbCountKey, totalUsageCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
@@ -196,6 +239,10 @@ public class BadgeService {
                     break;
                 case "calendar":
                     if (badge.getBadgeName().equals("청약 캘린더 마스터") && count == 10) {
+                        shouldAssignBadge = true;
+                    }
+                case "alert":
+                    if (badge.getBadgeName().equals("맞춤 알림 활용자") && count == 10) {
                         shouldAssignBadge = true;
                     }
             }

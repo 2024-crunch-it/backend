@@ -32,6 +32,9 @@ public class User {
     @Column(name = "calendar_usage_count", nullable = false)
     private int calendarUsageCount;
 
+    @Column(name = "custom_alert_usage_count", nullable = false)
+    private int customAlertUsageCount;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserBadge> userBadges = new HashSet<>();
 
