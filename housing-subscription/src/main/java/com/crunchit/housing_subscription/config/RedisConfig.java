@@ -11,16 +11,21 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, Integer> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Integer> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
 
-        // Key, Value Serializer 설정
+        // Key Serializer: String 타입
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Integer.class));
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericToStringSerializer<>(Integer.class));
 
+        // Value Serializer: String 과 Integer 를 지원
+        redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+
+        // Hash Key/Value Serializer
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new GenericToStringSerializer<>(Object.class));
+
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 }

@@ -5,11 +5,14 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
 @Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 public class HousingAnnouncementId implements Serializable {
 
     @Column(name = "pblanc_no", nullable = false, length = 40)
