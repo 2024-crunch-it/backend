@@ -35,7 +35,7 @@ public class HousingService {
 
     @Transactional(readOnly = true)
     public HousingResponseDto getHousingAnnouncementsLike (int page, int pageSize, Integer userId){
-        PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcritPblancDe"));
+        PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcrit_pblanc_de"));
         Page<HousingAnnouncement> entityPage = housingRepository.findAllWithLikes(userId, pageRequest);
         return getHousingResponseDto(entityPage);
     }
