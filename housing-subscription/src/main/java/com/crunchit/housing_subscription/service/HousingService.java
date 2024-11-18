@@ -54,6 +54,8 @@ public class HousingService {
                 .build();
     }
 
+
+
     public HousingDetailResponseDto getHousingAnnouncementDetail(String pblancNo, String houseManageNo){
         HousingAnnouncementId housingAnnouncementId = new HousingAnnouncementId();
         housingAnnouncementId.setPblancNo(pblancNo);
