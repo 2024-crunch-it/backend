@@ -21,7 +21,7 @@ public class UserController {
     @Operation(summary = "사용자 보유 계좌 조회", description = "사용자 보유 모든 계좌 반환")
     @GetMapping("accounts")
     public ResponseEntity<?> getAccountsByUserId(@Parameter(description = "사용자 ID")
-                                                                @RequestParam Long userId) {
+                                                                @RequestParam(name = "userId") Long userId) {
         return new ResponseEntity<>(accountService.getAccountsByUserId(userId), HttpStatus.OK);
     }
 
