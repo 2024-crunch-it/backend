@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -25,17 +26,20 @@ import java.util.stream.Collectors;
 public class HousingService {
     private final HousingAnnouncementRepository housingRepository;
 
+    @Transactional(readOnly = true)
     public HousingResponseDto getHousingAnnouncements(int page, int pageSize){
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcritPblancDe"));
         Page<HousingAnnouncement> entityPage = housingRepository.findAll(pageRequest);
         return getHousingResponseDto(entityPage);
     }
 
+    @Transactional(readOnly = true)
     public HousingResponseDto getHousingAnnouncementsLike (int page, int pageSize, Integer userId){
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcritPblancDe"));
         Page<HousingAnnouncement> entityPage = housingRepository.findAllWithLikes(userId, pageRequest);
         return getHousingResponseDto(entityPage);
     }
+
 
     private HousingResponseDto getHousingResponseDto(Page<HousingAnnouncement> entityPage) {
         Page<HousingListDto> dtoPage =  entityPage.map(a-> HousingListDto.builder()
@@ -65,14 +69,14 @@ public class HousingService {
                 .pageSize(dtoPage.getSize())
                 .build();
     }
-
+    @Transactional(readOnly = true)
     public HousingMonthlyResponseDto getHousingMonthlyAnnouncements(Integer year, Integer month){
         Date firstDay = getFirstDayOfMonth(year, month);
         Date lastDay = getLastDayOfMonth(year, month);
         List<HousingAnnouncement> announcements = housingRepository.findByDateRange(firstDay, lastDay);
         return getHousingMonthlyResponseDto(year, month, announcements);
     }
-
+    @Transactional(readOnly = true)
     public HousingMonthlyResponseDto getHousingMonthlyAnnouncementsLike(Integer year, Integer month, Integer userId){
         Date firstDay = getFirstDayOfMonth(year, month);
         Date lastDay = getLastDayOfMonth(year, month);
@@ -122,11 +126,13 @@ public class HousingService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public HousingMappedResponseDto getHousingMappedAnnouncements(){
         List<HousingAnnouncement> announcements = housingRepository.findByEndDatesAfterNow();
         return getHousingMappedResponseDto(announcements);
     }
 
+    @Transactional(readOnly = true)
     public HousingMappedResponseDto getHousingMappedAnnouncementsLike(int userId){
         List<HousingAnnouncement> announcements = housingRepository.findByEndDatesAfterNowLike(userId);
         return getHousingMappedResponseDto(announcements);
@@ -166,7 +172,7 @@ public class HousingService {
         HousingAnnouncementId housingAnnouncementId = new HousingAnnouncementId();
         housingAnnouncementId.setPblancNo(pblancNo);
         housingAnnouncementId.setHouseManageNo(houseManageNo);
-        HousingAnnouncement announcement = housingRepository.findById(housingAnnouncementId).orElseThrow(()->new IllegalArgumentException());
+        HousingAnnouncement announcement = housingRepository.findById(housingAnnouncementId).orElseThrow(IllegalArgumentException::new);
         List<HousingModelDto> modelDtoList = announcement.getModels().stream().map(model->
             HousingModelDto.builder()
                     .house_manage_no(model.getHouseManageNo())
