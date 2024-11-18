@@ -22,6 +22,7 @@ public class UserSubscriptionLikeService {
     private final UserRepository userRepository;
     private final HousingAnnouncementRepository housingAnnouncementRepository;
     private final UserSubscriptionLikeRepository likeRepository;
+    private final NotificationScheduleService notificationScheduleService; // 알림 관련 추가
 
     /**
      * 찜 목록 추가
@@ -46,6 +47,9 @@ public class UserSubscriptionLikeService {
         like.setUser(user);
         like.setHousingAnnouncement(announcement);
         likeRepository.save(like);
+
+        // 알림 스케줄 생성 추가
+        notificationScheduleService.createNotificationSchedules(user, announcement);
     }
 
     /**
