@@ -51,13 +51,22 @@ public class UserController {
         return new ResponseEntity<>("deposit ok", HttpStatus.OK);
     }
 
-//
-//    @Operation(summary = "청약 정보 찜 수 증가", description = "사용자의 청약 정보 찜 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
-//    @PostMapping("/bookmark")
-//    public ResponseEntity<?> incrementBookmark(
-//            @Parameter(description = "사용자 ID")
-//            @RequestParam(name = "userId") Long userId) {
-//    return new ResponseEntity<>("test ok", HttpStatus.OK);
-//        badgeService.incrementBookmark(userId);
-//    }
+    @Operation(summary = "캘린더 기능 사용 횟수 증가", description = "사용자의 캘린더 기능 사용 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
+    @PostMapping("/calendar-usage")
+    public ResponseEntity<?> incrementCalendarUsage(
+            @Parameter(description = "사용자 ID")
+            @RequestParam(name = "userId") Long userId) {
+        badgeService.incrementCalendarUsage(userId);
+        return new ResponseEntity<>("calendar usage incremented", HttpStatus.OK);
+    }
+
+    @Operation(summary = "맞춤 알림 활용 횟수 증가", description = "사용자의 맞춤 알림 활용 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
+    @PostMapping("/custom-alert-usage")
+    public ResponseEntity<?> incrementCustomAlertUsage(
+            @Parameter(description = "사용자 ID")
+            @RequestParam(name = "userId") Long userId) {
+        badgeService.incrementCustomAlertUsage(userId);
+        return new ResponseEntity<>("custom alert usage incremented", HttpStatus.OK);
+    }
+
 }
