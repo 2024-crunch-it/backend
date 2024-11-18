@@ -1,10 +1,10 @@
 package com.crunchit.housing_subscription.service;
 
+import com.crunchit.housing_subscription.dto.response.NotificationDto;
 import com.crunchit.housing_subscription.dto.response.NotificationMessageDto;
 import com.crunchit.housing_subscription.entity.HousingAnnouncement;
 import com.crunchit.housing_subscription.entity.NotificationHistory;
 import com.crunchit.housing_subscription.entity.NotificationSchedule;
-import com.crunchit.housing_subscription.entity.NotificationType;
 import com.crunchit.housing_subscription.repository.NotificationHistoryRepository;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -25,7 +25,8 @@ import java.util.List;
 public class NotificationService { // 알림 서비스
     private final FcmTokenService fcmTokenService;
     private final NotificationScheduleService notificationScheduleService;
-    private final NotificationHistoryRepository notificationRepository;
+    private final NotificationHistoryRepository notificationHistoryRepository;
+    private final SseEmitterService sseEmitterService;
 
     /**
      * 예약된 알림을 발송하는 스케줄러
@@ -100,9 +101,8 @@ public class NotificationService { // 알림 서비스
 
         // 알림 타입(시작전날/시작일/마감전날)에 따른 메시지 생성
         switch (schedule.getType()) {
-            case START_TOMORROW -> {
-                title = String.format("%s %s 청약 신청일이 내일부터 시작입니다!", houseNm, prefix);
-            }
+            case START_TOMORROW -> title = String.format("%s %s 청약 신청일이 내일부터 시작입니다!", houseNm, prefix);
+
             case START_TODAY -> {
                 title = String.format("%s %s 청약이 시작되었습니다!", houseNm, prefix);
                 // 시작일과 마감일이 같으면 당일 신청 강조 메시지
@@ -134,7 +134,30 @@ public class NotificationService { // 알림 서비스
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        notificationRepository.save(notification);
+        notification = notificationHistoryRepository.save(notification);
+
+        // SSE를 통해 실시간 알림도 전송
+        sseEmitterService.sendToUser(
+                notification.getUser().getUserId(),
+                NotificationDto.from(notification)
+        );
+    }
+
+    /**
+     * 알림 읽음 처리
+     */
+    @Transactional
+    public void markAsRead(Long notificationId, Long userId) {
+        NotificationHistory notification = notificationHistoryRepository
+                .findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        // 알림의 소유자 확인
+        if (!notification.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Not authorized to mark this notification as read");
+        }
+
+        notification.markAsRead();  // Entity 에 있는 markAsRead() 메서드 호출
     }
 
     // 테스트용 FCM 푸시 알림 전송
@@ -166,5 +189,4 @@ public class NotificationService { // 알림 서비스
             throw new RuntimeException("Failed to send notification", e);
         }
     }
-
 }
