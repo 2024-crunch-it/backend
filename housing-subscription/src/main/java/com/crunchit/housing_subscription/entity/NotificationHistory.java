@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Notification { // 알림 이력을 저장하는 Entity
+public class NotificationHistory { // 알림 이력을 저장하는 Entity
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
