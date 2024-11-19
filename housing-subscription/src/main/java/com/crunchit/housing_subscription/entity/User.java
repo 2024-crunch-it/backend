@@ -35,6 +35,9 @@ public class User {
     @Column(name = "custom_alert_usage_count", nullable = false)
     private int customAlertUsageCount;
 
+    @Column(name = "desired_area", nullable = false)
+    private int desiredArea;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserBadge> userBadges = new HashSet<>();
 

@@ -3,6 +3,7 @@ package com.crunchit.housing_subscription.api;
 import com.crunchit.housing_subscription.dto.response.UserResponseDto;
 import com.crunchit.housing_subscription.service.AccountService;
 import com.crunchit.housing_subscription.service.BadgeService;
+import com.crunchit.housing_subscription.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class UserController {
 
     private final BadgeService badgeService;
     private final AccountService accountService;
+    private final UserService userService;
 
     @Operation(summary = "사용자 보유 계좌 조회", description = "사용자 보유 모든 계좌 반환")
     @GetMapping("accounts")
@@ -67,6 +69,27 @@ public class UserController {
             @RequestParam(name = "userId") Long userId) {
         badgeService.incrementCustomAlertUsage(userId);
         return new ResponseEntity<>("custom alert usage incremented", HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자 청약 희망 면적 조회", description = "desiredArea 값 0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
+    @GetMapping("/desired-area")
+    public ResponseEntity<?> getDesiredAreaByUserId(@Parameter(description = "사용자 ID")
+                                                 @RequestParam Long userId) {
+        return new ResponseEntity<>(userService.getDesiredAreaByUser(userId), HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자의 청약 희망 면적 업데이트", description = "특정 사용자의 청약 희망 면적(desiredArea) 값을 업데이트")
+    @PutMapping("desired-area")
+    public ResponseEntity<?> updateDesiredArea(
+            @Parameter(description = "사용자 ID")
+            @RequestParam Long userId,
+            @Parameter(description = "0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
+            @RequestParam int desiredArea) {
+
+        // 서비스 호출
+        userService.updateDesiredArea(userId, desiredArea);
+
+        return new ResponseEntity<>("desiredArea 업데이트 완료", HttpStatus.OK);
     }
 
 }
