@@ -100,5 +100,11 @@ public class UserController {
         return new ResponseEntity<>(badgeCount, HttpStatus.OK);
     }
 
-    
+    @GetMapping("/accounts-balance-total")
+    @Operation(summary = "사용자의 계좌 잔액 총합 조회", description = "특정 사용자의 모든 계좌 잔액 총합을 반환")
+    public ResponseEntity<?> getTotalAccountBalance(@Parameter(description = "사용자 ID")
+                                                        @RequestParam Long userId) {
+        double totalBalance = userService.getTotalAccountBalance(userId);
+        return new ResponseEntity<>(totalBalance, HttpStatus.OK);
+    }
 }
