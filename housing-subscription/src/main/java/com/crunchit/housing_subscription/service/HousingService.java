@@ -5,7 +5,9 @@ import com.crunchit.housing_subscription.dto.response.*;
 import com.crunchit.housing_subscription.entity.HousingAnnouncement;
 import com.crunchit.housing_subscription.entity.HousingAnnouncementId;
 import com.crunchit.housing_subscription.entity.HousingAnnouncementModel;
+import com.crunchit.housing_subscription.entity.UserSubscriptionLike;
 import com.crunchit.housing_subscription.repository.HousingAnnouncementRepository;
+import com.crunchit.housing_subscription.repository.UserSubscriptionLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,32 +18,43 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class HousingService {
     private final HousingAnnouncementRepository housingRepository;
+    private final UserSubscriptionLikeRepository housingLikeRepository;
 
     @Transactional(readOnly = true)
-    public HousingResponseDto getHousingAnnouncements(int page, int pageSize){
+    public HousingResponseDto getHousingAnnouncements(int page, int pageSize, Long userId){
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcritPblancDe"));
         Page<HousingAnnouncement> entityPage = housingRepository.findAll(pageRequest);
-        return getHousingResponseDto(entityPage);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingResponseDto(entityPage, announcementIdSet);
     }
 
     @Transactional(readOnly = true)
-    public HousingResponseDto getHousingAnnouncementsLike (int page, int pageSize, Integer userId){
+    public HousingResponseDto getHousingAnnouncementsLike (int page, int pageSize, Long userId){
         PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "rcrit_pblanc_de"));
         Page<HousingAnnouncement> entityPage = housingRepository.findAllWithLikes(userId, pageRequest);
-        return getHousingResponseDto(entityPage);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingResponseDto(entityPage, announcementIdSet);
     }
 
 
-    private HousingResponseDto getHousingResponseDto(Page<HousingAnnouncement> entityPage) {
+    private HousingResponseDto getHousingResponseDto(Page<HousingAnnouncement> entityPage, Set<HousingAnnouncementId> announcementIdSet) {
         Page<HousingListDto> dtoPage =  entityPage.map(a-> HousingListDto.builder()
                 .house_manage_no(a.getHouseManageNo())
                 .pblanc_no(a.getPblancNo())
@@ -59,6 +72,7 @@ public class HousingService {
                 .subscrpt_rcept_endde(formatDate(a.getSubscrptRceptEndde()))
                 .rcept_bgnde(formatDate(a.getRceptBgnde()))
                 .rcept_endde(formatDate(a.getRceptEndde()))
+                .isLiked(checkLiked(announcementIdSet, a))
                 .build());
 
         return HousingResponseDto.builder()
@@ -70,21 +84,33 @@ public class HousingService {
                 .build();
     }
     @Transactional(readOnly = true)
-    public HousingMonthlyResponseDto getHousingMonthlyAnnouncements(Integer year, Integer month){
+    public HousingMonthlyResponseDto getHousingMonthlyAnnouncements(Integer year, Integer month, Long userId){
         Date firstDay = getFirstDayOfMonth(year, month);
         Date lastDay = getLastDayOfMonth(year, month);
         List<HousingAnnouncement> announcements = housingRepository.findByDateRange(firstDay, lastDay);
-        return getHousingMonthlyResponseDto(year, month, announcements);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingMonthlyResponseDto(year, month, announcements, announcementIdSet);
     }
     @Transactional(readOnly = true)
-    public HousingMonthlyResponseDto getHousingMonthlyAnnouncementsLike(Integer year, Integer month, Integer userId){
+    public HousingMonthlyResponseDto getHousingMonthlyAnnouncementsLike(Integer year, Integer month, Long userId){
         Date firstDay = getFirstDayOfMonth(year, month);
         Date lastDay = getLastDayOfMonth(year, month);
         List<HousingAnnouncement> announcements = housingRepository.findByDateRangeLike(firstDay, lastDay, userId);
-        return getHousingMonthlyResponseDto(year, month, announcements);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingMonthlyResponseDto(year, month, announcements, announcementIdSet);
     }
 
-    private HousingMonthlyResponseDto getHousingMonthlyResponseDto(Integer year, Integer month, List<HousingAnnouncement> announcements) {
+    private HousingMonthlyResponseDto getHousingMonthlyResponseDto(Integer year, Integer month, List<HousingAnnouncement> announcements, Set<HousingAnnouncementId> idSet) {
         List<HousingMonthlyDto> announcementDtoList = announcements.stream().map(
                 a-> HousingMonthlyDto.builder()
                         .house_manage_no(a.getHouseManageNo())
@@ -116,6 +142,7 @@ public class HousingService {
                         .gnrl_rnk2_etc_gg_endde(formatDate(a.getGnrlRnk2EtcGgEndde()))
                         .gnrl_rnk2_etc_area_rcptde(formatDate(a.getGnrlRnk2EtcAreaRcptde()))
                         .gnrl_rnk2_etc_area_endde(formatDate(a.getGnrlRnk2CrspareaEndde()))
+                        .isLiked(checkLiked(idSet, a))
                         .build()
         ).toList();
         return HousingMonthlyResponseDto.builder()
@@ -127,18 +154,30 @@ public class HousingService {
     }
 
     @Transactional(readOnly = true)
-    public HousingMappedResponseDto getHousingMappedAnnouncements(){
+    public HousingMappedResponseDto getHousingMappedAnnouncements(Long userId){
         List<HousingAnnouncement> announcements = housingRepository.findByEndDatesAfterNow();
-        return getHousingMappedResponseDto(announcements);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingMappedResponseDto(announcements, announcementIdSet);
     }
 
     @Transactional(readOnly = true)
-    public HousingMappedResponseDto getHousingMappedAnnouncementsLike(int userId){
+    public HousingMappedResponseDto getHousingMappedAnnouncementsLike(Long userId){
         List<HousingAnnouncement> announcements = housingRepository.findByEndDatesAfterNowLike(userId);
-        return getHousingMappedResponseDto(announcements);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
+        return getHousingMappedResponseDto(announcements, announcementIdSet);
     }
 
-    private HousingMappedResponseDto getHousingMappedResponseDto(List<HousingAnnouncement> announcements) {
+    private HousingMappedResponseDto getHousingMappedResponseDto(List<HousingAnnouncement> announcements, Set<HousingAnnouncementId> idSet) {
         List<HousingMappedDto> housingMappedDtoList = announcements.stream().map(
                 a-> HousingMappedDto.builder()
                         .house_manage_no(a.getHouseManageNo())
@@ -158,6 +197,7 @@ public class HousingService {
                         .subscrpt_rcept_endde(formatDate(a.getSubscrptRceptEndde()))
                         .rcept_bgnde(formatDate(a.getRceptBgnde()))
                         .rcept_endde(formatDate(a.getRceptEndde()))
+                        .isLiked(checkLiked(idSet, a))
                         .build()
         ).toList();
 
@@ -168,11 +208,17 @@ public class HousingService {
     }
 
 
-    public HousingDetailResponseDto getHousingAnnouncementDetail(String pblancNo, String houseManageNo){
+    public HousingDetailResponseDto getHousingAnnouncementDetail(String pblancNo, String houseManageNo, Long userId){
         HousingAnnouncementId housingAnnouncementId = new HousingAnnouncementId();
         housingAnnouncementId.setPblancNo(pblancNo);
         housingAnnouncementId.setHouseManageNo(houseManageNo);
         HousingAnnouncement announcement = housingRepository.findById(housingAnnouncementId).orElseThrow(IllegalArgumentException::new);
+        List<UserSubscriptionLike> likedAnnouncements = housingLikeRepository.findAllByUser_UserId(userId);
+        Set<HousingAnnouncementId> announcementIdSet = new HashSet<>();
+        for(UserSubscriptionLike likedAnnouncement : likedAnnouncements){
+            HousingAnnouncementId likedId = new HousingAnnouncementId(likedAnnouncement.getHousingAnnouncement().getPblancNo(), likedAnnouncement.getHousingAnnouncement().getHouseManageNo());
+            announcementIdSet.add(likedId);
+        }
         List<HousingModelDto> modelDtoList = announcement.getModels().stream().map(model->
             HousingModelDto.builder()
                     .house_manage_no(model.getHouseManageNo())
@@ -244,12 +290,18 @@ public class HousingService {
                 .npln_prvopr_public_house_at(announcement.getNplnPrvoprPublicHouseAt())
                 .public_house_spclm_applc_apt(announcement.getPublicHouseSpclmApplcApt())
                 .pblanc_url(announcement.getPblancUrl())
+                .isLiked(checkLiked(announcementIdSet, announcement))
                 .house_models(modelDtoList)
                 .build();
 
         return HousingDetailResponseDto.builder()
                 .data(announcementDto)
                 .build();
+    }
+
+    private boolean checkLiked(Set<HousingAnnouncementId> idSet, HousingAnnouncement a){
+        HousingAnnouncementId id = new HousingAnnouncementId(a.getPblancNo(), a.getHouseManageNo());
+        return idSet.contains(id);
     }
 
     private String formatDate(Date date){

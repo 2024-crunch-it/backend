@@ -27,7 +27,7 @@ public interface HousingAnnouncementRepository extends JpaRepository<HousingAnno
         WHERE tusl.user_id = :userId
         
         """, nativeQuery = true)
-    Page<HousingAnnouncement> findAllWithLikes(@Param("userId") int userId, PageRequest pageRequest);
+    Page<HousingAnnouncement> findAllWithLikes(@Param("userId") Long userId, PageRequest pageRequest);
 
     @Query(value = """
     SELECT * FROM tbl_housing_pblanc thp
@@ -49,7 +49,7 @@ public interface HousingAnnouncementRepository extends JpaRepository<HousingAnno
        OR (thp.subscrpt_rcept_endde BETWEEN :startDate AND :endDate)
        AND tusl.user_id= :userId
 """, nativeQuery = true)
-    List<HousingAnnouncement> findByDateRangeLike(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("userId") int userId);
+    List<HousingAnnouncement> findByDateRangeLike(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("userId") Long userId);
 
     @Query(value = """
         SELECT * FROM tbl_housing_pblanc thp
@@ -67,5 +67,5 @@ public interface HousingAnnouncementRepository extends JpaRepository<HousingAnno
            OR thp.subscrpt_rcept_endde > CURRENT_TIMESTAMP()
            AND tusl.user_id= :userId
         """, nativeQuery = true)
-    List<HousingAnnouncement> findByEndDatesAfterNowLike(@Param("userId") int userId);
+    List<HousingAnnouncement> findByEndDatesAfterNowLike(@Param("userId") Long userId);
 }
