@@ -37,4 +37,5 @@ public class HousingMonthlyDto {
     private String gnrl_rnk2_etc_gg_endde;      // 2순위 경기지역 접수종료일
     private String gnrl_rnk2_etc_area_rcptde;   // 2순위 기타지역 접수시작일
     private String gnrl_rnk2_etc_area_endde;    // 2순위 기타지역 접수종료일
+    private Boolean isLiked;
 }

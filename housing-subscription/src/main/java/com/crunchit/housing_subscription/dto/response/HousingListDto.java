@@ -24,4 +24,5 @@ public class HousingListDto {
     private String subscrpt_rcept_endde;      // 청약접수종료일
     private String rcept_bgnde;               // 청약접수시작일
     private String rcept_endde;               // 청약접수종료일
+    private Boolean isLiked;
 }
