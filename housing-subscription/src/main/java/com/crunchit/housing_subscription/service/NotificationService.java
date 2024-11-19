@@ -2,9 +2,7 @@ package com.crunchit.housing_subscription.service;
 
 import com.crunchit.housing_subscription.dto.response.NotificationDto;
 import com.crunchit.housing_subscription.dto.response.NotificationMessageDto;
-import com.crunchit.housing_subscription.entity.HousingAnnouncement;
-import com.crunchit.housing_subscription.entity.NotificationHistory;
-import com.crunchit.housing_subscription.entity.NotificationSchedule;
+import com.crunchit.housing_subscription.entity.*;
 import com.crunchit.housing_subscription.repository.NotificationHistoryRepository;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -131,7 +129,6 @@ public class NotificationService { // 알림 서비스
                 .notificationType(schedule.getType())
                 .title(message.getTitle())
                 .message(message.getBody())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         notification = notificationHistoryRepository.save(notification);
@@ -158,6 +155,52 @@ public class NotificationService { // 알림 서비스
         }
 
         notification.markAsRead();  // Entity 에 있는 markAsRead() 메서드 호출
+    }
+
+    // 뱃지 획득 알림 발송 메서드 추가
+    public void sendBadgeNotification(User user, String badgeName) {
+        try {
+            // FCM 토큰 조회
+            String userToken = fcmTokenService.getToken(user.getUserId());
+            if (userToken == null) {
+                log.warn("FCM token not found for user: {}", user.getUserId());
+                return;
+            }
+
+            String title = badgeName + " 뱃지를 획득하였습니다!";
+            String body = "획득한 뱃지를 확인해보세요";
+
+            // FCM 메시지 생성 및 발송
+            Message message = Message.builder()
+                    .setToken(userToken)
+                    .setNotification(Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .putData("type", "BADGE")
+                    .build();
+
+            FirebaseMessaging.getInstance().send(message);
+
+            // 알림 이력 저장
+            NotificationHistory notification = NotificationHistory.builder()
+                    .user(user)
+                    .notificationType(NotificationType.BADGE) // 추가
+                    .title(title)
+                    .message(body)
+                    .build(); // createdAt은 @CreationTimestamp 로 자동 설정됨
+
+            notification = notificationHistoryRepository.save(notification);
+
+            // SSE 로 실시간 알림 전송
+            sseEmitterService.sendToUser(
+                    user.getUserId(),
+                    NotificationDto.from(notification)
+            );
+
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to send badge notification", e);
+        }
     }
 
     // 테스트용 FCM 푸시 알림 전송

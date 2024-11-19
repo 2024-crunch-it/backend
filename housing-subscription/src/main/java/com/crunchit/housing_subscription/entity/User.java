@@ -48,13 +48,15 @@ public class User {
     private Set<UserSubscriptionLike> likes = new HashSet<>();
 
     // 연관관계 관리 메서드
-    public void addBadge(Badge badge) {
+    public boolean addBadge(Badge badge) {
         // 중복 검사 후 새로운 뱃지 추가
         if (userBadges.stream().noneMatch(userBadge -> userBadge.getBadge().equals(badge))) {
             UserBadge userBadge = new UserBadge();
             userBadge.setUser(this); // 연관 설정
             userBadge.setBadge(badge); // 연관 설정
             this.userBadges.add(userBadge);
+            return true;
         }
+        return false;
     }
 }

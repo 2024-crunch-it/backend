@@ -26,10 +26,11 @@ public class NotificationHistory { // 알림 이력을 저장하는 Entity
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // 뱃지 알림 추가로 null 값 허용으로 바꿈
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-            @JoinColumn(name = "pblanc_no", referencedColumnName = "pblanc_no", nullable = false),
-            @JoinColumn(name = "house_manage_no", referencedColumnName = "house_manage_no", nullable = false)
+            @JoinColumn(name = "pblanc_no", referencedColumnName = "pblanc_no"),
+            @JoinColumn(name = "house_manage_no", referencedColumnName = "house_manage_no")
     })
     private HousingAnnouncement housingAnnouncement;
 
