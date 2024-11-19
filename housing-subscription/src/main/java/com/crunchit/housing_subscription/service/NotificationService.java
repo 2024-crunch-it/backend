@@ -14,7 +14,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -86,7 +89,7 @@ public class NotificationService { // 알림 서비스
         HousingAnnouncement announcement = schedule.getHousingAnnouncement();
         String houseNm = announcement.getHouseNm();
         String title = ""; // 초기화
-        String body = null; // null 가능하므로 null 로 초기화
+        LocalDate startDate, endDate;
 
         // 주택구분코드에 따른 접두어 설정
         // 04: 무순위/잔여세대, 06: 계약취소주택, 11: 임의공급
@@ -97,24 +100,41 @@ public class NotificationService { // 알림 서비스
             default -> ""; // 01, 10의 경우 접두어 없음
         };
 
+        // 주택구분코드에 따른 청약 시작일과 종료일
+        if (Arrays.asList("01", "10").contains(announcement.getHouseSecd())) {
+            startDate = announcement.getRceptBgnde().toInstant()
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toLocalDate();
+            endDate = announcement.getRceptEndde().toInstant()
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toLocalDate();
+        } else {
+            startDate = announcement.getSubscrptRceptBgnde().toInstant()
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toLocalDate();
+            endDate = announcement.getSubscrptRceptEndde().toInstant()
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toLocalDate();
+        }
+
         // 알림 타입(시작전날/시작일/마감전날)에 따른 메시지 생성
         switch (schedule.getType()) {
-            case START_TOMORROW -> title = String.format("%s %s 청약 신청일이 내일부터 시작입니다!", houseNm, prefix);
+            case START_TOMORROW -> title = String.format("%s 청약 신청일이 내일입니다!", prefix);
 
             case START_TODAY -> {
-                title = String.format("%s %s 청약이 시작되었습니다!", houseNm, prefix);
-                // 시작일과 마감일이 같으면 당일 신청 강조 메시지
-                body = announcement.getRceptEndde().equals(announcement.getRceptBgnde()) ?
-                        "오늘 하루만 신청 받으니 빨리 신청해보세요" :
-                        "청약 상세 일정을 확인해보세요";
+                if (startDate.equals(endDate)) {
+                    // 시작일과 마감일이 같은 경우
+                    title = String.format("%s 청약 신청이 오늘 하루만 진행됩니다!", prefix);
+                } else {
+                    title = String.format("%s 청약이 시작되었습니다!", prefix);
+                }
             }
             case END_TOMORROW -> {
-                title = String.format("%s %s 청약 마감일 하루 전입니다!", houseNm, prefix);
-                body = "청약 신청 놓치지 말아요";
+                title = String.format("%s 청약 마감일 하루 전입니다!", prefix);
             }
         }
 
-        return new NotificationMessageDto(title, body);
+        return new NotificationMessageDto(title, houseNm);
     }
 
     /**
