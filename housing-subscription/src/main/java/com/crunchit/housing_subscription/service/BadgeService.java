@@ -28,6 +28,7 @@ public class BadgeService {
     private final BadgeRepository badgeRepository;
     private final AccountRepository accountRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public UserResponseDto getUserWithBadges(Long userId) {
@@ -261,9 +262,14 @@ public class BadgeService {
                 .orElseThrow(() -> new RuntimeException("User with ID " + userId + " not found"));
 
         // 사용자에게 뱃지 추가 (addBadge 내부에서 중복 체크)
-        user.addBadge(badge);
+        boolean flag = user.addBadge(badge);
 
-        // 변경된 사용자 저장 (Cascade 설정으로 UserBadge도 저장됨)
-        userRepository.save(user);
+        if (flag) {
+            // 변경된 사용자 저장 (Cascade 설정으로 UserBadge 도 저장됨)
+            userRepository.save(user);
+
+            // 뱃지 획득 알림 발송
+            notificationService.sendBadgeNotification(user, badge.getBadgeName());
+        }
     }
 }

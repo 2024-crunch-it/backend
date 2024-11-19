@@ -24,8 +24,10 @@ public class UserSubscriptionLikeService {
     private final UserRepository userRepository;
     private final HousingAnnouncementRepository housingAnnouncementRepository;
     private final UserSubscriptionLikeRepository likeRepository;
+    private final NotificationScheduleService notificationScheduleService; // 알림 관련 추가
     private final BadgeRepository badgeRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+
     /**
      * 찜 목록 추가
      */
@@ -51,6 +53,9 @@ public class UserSubscriptionLikeService {
         likeRepository.save(like);
 
         incrementBookmarkCount(userId);
+
+        // 알림 스케줄 생성 추가
+        notificationScheduleService.createNotificationSchedules(user, announcement);
     }
 
     /**
@@ -95,15 +100,15 @@ public class UserSubscriptionLikeService {
 
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
 
-        // Redis에서 방문 횟수 증가
+        // Redis 에서 방문 횟수 증가
         Integer redisVisitCount = Optional.ofNullable(operations.get(eventKey))
                 .map(Object::toString)
                 .map(Integer::valueOf)
                 .orElse(0);
 
-        operations.increment(eventKey, 1); // Redis에서 1 증가
+        operations.increment(eventKey, 1); // Redis 에서 1 증가
 
-        // dbCountKey 값이 없다면 DB에서 조회하여 초기화
+        // dbCountKey 값이 없다면 DB 에서 조회하여 초기화
         Integer dbVisitCount = Optional.ofNullable(operations.get(dbCountKey))
                 .map(Object::toString)
                 .map(Integer::valueOf)
@@ -114,7 +119,7 @@ public class UserSubscriptionLikeService {
                     return count;
                 });
 
-        // DB와 Redis의 카운트를 합산하여 조건 체크
+        // DB와 Redis 의 카운트를 합산하여 조건 체크
         int totalBookmarkCount = Optional.ofNullable(dbVisitCount).orElse(0) + redisVisitCount;
         checkAndAssignBadge(userId, totalBookmarkCount, "bookmark");
 
