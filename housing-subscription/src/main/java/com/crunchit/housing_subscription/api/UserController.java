@@ -92,4 +92,13 @@ public class UserController {
         return new ResponseEntity<>("desiredArea 업데이트 완료", HttpStatus.OK);
     }
 
+    @GetMapping("/badge-count")
+    @Operation(summary = "사용자의 뱃지 개수 조회", description = "특정 사용자가 보유한 뱃지의 개수를 반환")
+    public ResponseEntity<?> getBadgeCount(@Parameter(description = "사용자 ID")
+                                               @RequestParam Long userId) {
+        int badgeCount = userService.getUserBadgeCount(userId);
+        return new ResponseEntity<>(badgeCount, HttpStatus.OK);
+    }
+
+    
 }

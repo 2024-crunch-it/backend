@@ -41,4 +41,14 @@ public class UserService {
         user.setDesiredArea(desiredArea);
 
     }
+
+    @Transactional(readOnly = true)
+    public int getUserBadgeCount(Long userId) {
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
+
+        // userBadges 개수 반환
+        return user.getUserBadges().size();
+    }
 }
