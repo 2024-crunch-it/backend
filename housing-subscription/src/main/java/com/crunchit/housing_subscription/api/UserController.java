@@ -44,15 +44,6 @@ public class UserController {
         return new ResponseEntity<>("calendar usage incremented", HttpStatus.OK);
     }
 
-    @Operation(summary = "맞춤 알림 활용 횟수 증가", description = "사용자의 맞춤 알림 활용 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
-    @PostMapping("/custom-alert-usage")
-    public ResponseEntity<?> incrementCustomAlertUsage(
-            @Parameter(description = "사용자 ID")
-            @RequestParam(name = "userId") Long userId) {
-        badgeService.incrementCustomAlertUsage(userId);
-        return new ResponseEntity<>("custom alert usage incremented", HttpStatus.OK);
-    }
-
     @Operation(summary = "사용자 청약 희망 면적 조회", description = "desiredArea 값 0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
     @GetMapping("/desired-area")
     public ResponseEntity<?> getDesiredAreaByUserId(@Parameter(description = "사용자 ID")
