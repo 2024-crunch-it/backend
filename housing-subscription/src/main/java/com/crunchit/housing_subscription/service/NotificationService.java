@@ -187,15 +187,14 @@ public class NotificationService { // 알림 서비스
                 return;
             }
 
-            String title = badgeName + " 뱃지를 획득하였습니다!";
-            String body = "획득한 뱃지를 확인해보세요";
+            String title = "뱃지를 획득하였습니다!";
 
             // FCM 메시지 생성 및 발송
             Message message = Message.builder()
                     .setToken(userToken)
                     .setNotification(Notification.builder()
                             .setTitle(title)
-                            .setBody(body)
+                            .setBody(badgeName)
                             .build())
                     .putData("type", "BADGE")
                     .build();
@@ -207,7 +206,7 @@ public class NotificationService { // 알림 서비스
                     .user(user)
                     .notificationType(NotificationType.BADGE) // 추가
                     .title(title)
-                    .message(body)
+                    .message(badgeName)
                     .build(); // createdAt은 @CreationTimestamp 로 자동 설정됨
 
             notification = notificationHistoryRepository.save(notification);
