@@ -5,6 +5,7 @@ import com.crunchit.housing_subscription.dto.response.NotificationDto;
 import com.crunchit.housing_subscription.entity.User;
 import com.crunchit.housing_subscription.repository.NotificationHistoryRepository;
 import com.crunchit.housing_subscription.repository.UserRepository;
+import com.crunchit.housing_subscription.service.BadgeService;
 import com.crunchit.housing_subscription.service.FcmTokenService;
 import com.crunchit.housing_subscription.service.NotificationService;
 import com.crunchit.housing_subscription.service.SseEmitterService;
@@ -26,6 +27,7 @@ public class NotificationController { // 알림 관련 API 컨트롤러
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final SseEmitterService sseEmitterService;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
 
     // FCM 토큰 등록 API
     @PostMapping("/token")
@@ -67,6 +69,7 @@ public class NotificationController { // 알림 관련 API 컨트롤러
     public ResponseEntity<Void> markAsRead(
             @PathVariable("notificationId") Long notificationId,
             @RequestHeader("X-USER-ID") Long userId) {
+        badgeService.incrementCustomAlertUsage(userId);
         notificationService.markAsRead(notificationId, userId);
         return ResponseEntity.ok().build();
     }
