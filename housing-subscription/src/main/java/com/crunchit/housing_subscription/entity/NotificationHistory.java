@@ -26,14 +26,6 @@ public class NotificationHistory { // 알림 이력을 저장하는 Entity
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 뱃지 알림 추가로 null 값 허용으로 바꿈
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "pblanc_no", referencedColumnName = "pblanc_no"),
-            @JoinColumn(name = "house_manage_no", referencedColumnName = "house_manage_no")
-    })
-    private HousingAnnouncement housingAnnouncement;
-
     // 알림 타입 (START_TOMORROW: 청약 시작 하루 전, START_TODAY: 청약 시작일, END_TOMORROW: 청약 마감 하루 전)
     @Column(name = "notification_type", nullable = false)
     @Enumerated(EnumType.STRING)

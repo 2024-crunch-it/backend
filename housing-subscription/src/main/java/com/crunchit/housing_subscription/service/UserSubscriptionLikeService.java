@@ -27,6 +27,7 @@ public class UserSubscriptionLikeService {
     private final NotificationScheduleService notificationScheduleService; // 알림 관련 추가
     private final BadgeRepository badgeRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final NotificationService notificationService;
 
     /**
      * 찜 목록 추가
@@ -120,7 +121,7 @@ public class UserSubscriptionLikeService {
                 });
 
         // DB와 Redis 의 카운트를 합산하여 조건 체크
-        int totalBookmarkCount = Optional.ofNullable(dbVisitCount).orElse(0) + redisVisitCount;
+        int totalBookmarkCount = Optional.ofNullable(dbVisitCount).orElse(0) + redisVisitCount + 1;
         checkAndAssignBadge(userId, totalBookmarkCount, "bookmark");
 
 
@@ -201,11 +202,15 @@ public class UserSubscriptionLikeService {
         User user = userRepository.findWithBadgesByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User with ID " + userId + " not found"));
 
-        // 사용자에게 뱃지 추가 (addBadge 내부에서 중복 체크)
-        user.addBadge(badge);
+        boolean flag = user.addBadge(badge);
 
-        // 변경된 사용자 저장 (Cascade 설정으로 UserBadge도 저장됨)
-        userRepository.save(user);
+        if (flag) {
+            // 변경된 사용자 저장 (Cascade 설정으로 UserBadge 도 저장됨)
+            userRepository.save(user);
+
+            // 뱃지 획득 알림 발송
+            notificationService.sendBadgeNotification(user, badge.getBadgeName());
+        }
     }
 
 }

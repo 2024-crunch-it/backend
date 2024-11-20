@@ -145,7 +145,6 @@ public class NotificationService { // 알림 서비스
         // Entity 의 Notification 과 Firebase 의 Notification 이 충돌 => Entity 이름 NotificationHistory 로 변경
         NotificationHistory notification = NotificationHistory.builder()
                 .user(schedule.getUser())
-                .housingAnnouncement(schedule.getHousingAnnouncement())
                 .notificationType(schedule.getType())
                 .title(message.getTitle())
                 .message(message.getBody())

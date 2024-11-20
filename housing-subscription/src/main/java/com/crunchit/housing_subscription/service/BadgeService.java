@@ -88,7 +88,7 @@ public class BadgeService {
             .map(Integer::valueOf)
             .orElseGet(() -> {
                 User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-                int count = user.getCalendarUsageCount();
+                int count = user.getPageVisitCount();
                 operations.set(dbCountKey, count, 1, TimeUnit.DAYS); // 하루 동안 유지
                 return count;
             });
