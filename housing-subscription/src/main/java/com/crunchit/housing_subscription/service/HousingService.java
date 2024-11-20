@@ -45,7 +45,7 @@ public class HousingService {
 
 
     private HousingResponseDto getHousingResponseDto(Page<HousingAnnouncement> entityPage, Set<HousingAnnouncementId> announcementIdSet) {
-        Page<HousingListDto> dtoPage =  entityPage.map(a-> HousingListDto.builder()
+        Page<HousingListDto> dtoPage = entityPage.map(a -> HousingListDto.builder()
                 .house_manage_no(a.getHouseManageNo())
                 .pblanc_no(a.getPblancNo())
                 .house_nm(a.getHouseNm())

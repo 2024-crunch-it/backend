@@ -26,7 +26,7 @@ public class HousingController {
     @GetMapping("/getAnnouncement")
     public ResponseEntity<?> getHousingAnnouncement(
             @Parameter(description = "페이지 번호, 페이지 크기, 유저 아이디")
-            @RequestParam(name = "page") Integer page, @RequestParam(name="pageSize") Integer pageSize, @RequestParam(name="userId") Long userId){
+            @RequestParam(name = "page") Integer page, @RequestParam(name = "pageSize") Integer pageSize, @RequestParam(name = "userId") Long userId) {
         HousingResponseDto housingAnnouncements = housingService.getHousingAnnouncements(page, pageSize, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
@@ -35,7 +35,7 @@ public class HousingController {
     @GetMapping("/getAnnouncementLike")
     public ResponseEntity<?> getHousingAnnouncementLike(
             @Parameter(description = "페이지 번호, 페이지 크기, 유저 아이디")
-            @RequestParam(name = "page") Integer page, @RequestParam(name="pageSize") Integer pageSize, @RequestParam(name="userId") Long userId){
+            @RequestParam(name = "page") Integer page, @RequestParam(name = "pageSize") Integer pageSize, @RequestParam(name = "userId") Long userId) {
         HousingResponseDto housingAnnouncements = housingService.getHousingAnnouncementsLike(page, pageSize, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
@@ -44,7 +44,7 @@ public class HousingController {
     @GetMapping("/getMonthlyAnnouncement")
     public ResponseEntity<?> getMonthlyHousingAnnouncement(
             @Parameter(description = "연도, 월, 유저 아이디")
-            @RequestParam(name = "year") Integer year, @RequestParam(name="month") Integer month, @RequestParam(name="userId") Long userId) {
+            @RequestParam(name = "year") Integer year, @RequestParam(name = "month") Integer month, @RequestParam(name = "userId") Long userId) {
         HousingMonthlyResponseDto housingAnnouncements = housingService.getHousingMonthlyAnnouncements(year, month, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
@@ -53,7 +53,7 @@ public class HousingController {
     @GetMapping("/getMonthlyAnnouncementLike")
     public ResponseEntity<?> getMonthlyHousingAnnouncementLike(
             @Parameter(description = "연도, 월, 유저 아이디")
-            @RequestParam(name = "year") Integer year, @RequestParam(name="month") Integer month, @RequestParam(name="userId") Long userId) {
+            @RequestParam(name = "year") Integer year, @RequestParam(name = "month") Integer month, @RequestParam(name = "userId") Long userId) {
         HousingMonthlyResponseDto housingAnnouncements = housingService.getHousingMonthlyAnnouncementsLike(year, month, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
@@ -71,7 +71,8 @@ public class HousingController {
     @GetMapping("/getMappedAnnouncementLike")
     public ResponseEntity<?> getMappedHousingAnnouncementLike(
             @Parameter(description = "유저 아이디")
-                                                                  @RequestParam(name = "userId") Long userId){
+            @RequestParam(name = "userId") Long userId) {
+
         HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncementsLike(userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
@@ -80,7 +81,7 @@ public class HousingController {
     @GetMapping("/getAnnouncementDetail")
     public ResponseEntity<?> getAnnouncementDetail(
             @Parameter(description = "공고 번호, 주택관리번호, 유저 아이디")
-            @RequestParam(name = "pblancNo") String pblancNo, @RequestParam(name="houseManageNo") String houseManageNo, @RequestParam(name = "userId") Long userId){
+            @RequestParam(name = "pblancNo") String pblancNo, @RequestParam(name = "houseManageNo") String houseManageNo, @RequestParam(name = "userId") Long userId) {
         HousingDetailResponseDto announcementDetail = housingService.getHousingAnnouncementDetail(pblancNo, houseManageNo, userId);
         return ResponseEntity.ok(announcementDetail);
     }

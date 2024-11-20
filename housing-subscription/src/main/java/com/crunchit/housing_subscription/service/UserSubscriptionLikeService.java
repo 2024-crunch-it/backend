@@ -142,7 +142,10 @@ public class UserSubscriptionLikeService {
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
 
         // Redis에서 방문 횟수 감소
-        Integer redisVisitCount = (Integer) operations.get(eventKey);
+        Integer redisVisitCount = Optional.ofNullable(operations.get(eventKey))
+                .map(Object::toString)
+                .map(Integer::valueOf)
+                .orElse(0);
 
         // Redis 값이 null이거나 0이면 DB에서 직접 감소 처리
         if (redisVisitCount == null || redisVisitCount <= 0) {
