@@ -44,13 +44,13 @@ public class HousingController {
     }
 
     @GetMapping("/getMappedAnnouncement")
-    public ResponseEntity<?> getMappedHousingAnnouncement(@RequestParam Long userId) {
+    public ResponseEntity<?> getMappedHousingAnnouncement(@RequestParam(name = "userId") Long userId) {
         HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncements(userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getMappedAnnouncementLike")
-    public ResponseEntity<?> getMappedHousingAnnouncementLike(@RequestParam Long userId){
+    public ResponseEntity<?> getMappedHousingAnnouncementLike(@RequestParam(name = "userId") Long userId){
         HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncementsLike(userId);
         return ResponseEntity.ok(housingAnnouncements);
     }

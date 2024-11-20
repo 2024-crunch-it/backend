@@ -56,7 +56,7 @@ public class NotificationController { // 알림 관련 API 컨트롤러
 
     // SSE 연결 설정 (SSE 구독)
     @GetMapping("/subscribe")
-    public SseEmitter subscribe(@RequestHeader("X-USER-ID") Long userId) {
+    public SseEmitter subscribe(@RequestParam("userId") Long userId) {
         return sseEmitterService.add(userId);
     }
 
