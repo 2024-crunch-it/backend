@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -35,15 +37,36 @@ public class BadgeService {
         User user = userRepository.findWithBadgesByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<BadgeDto> badgeDtos = user.getUserBadges().stream()
-                .map(userBadge -> new BadgeDto(
-                        userBadge.getBadge().getBadgeNumber(),
-                        userBadge.getBadge().getBadgeName(),
-                        LocalDateTime.now()
-                ))
-                .collect(Collectors.toList());
+        // 전체 뱃지 조회
+        List<Badge> allBadges = badgeRepository.findAll();
 
-        return new UserResponseDto(user.getUserId(), user.getUserName(), badgeDtos);
+        // 사용자가 보유한 뱃지 ID 추출
+        Set<Integer> ownedBadgeNumbers = user.getUserBadges().stream()
+                .map(userBadge -> userBadge.getBadge().getBadgeNumber())
+                .collect(Collectors.toSet());
+
+        // 보유한 뱃지와 보유하지 않은 뱃지를 분리
+        List<BadgeDto> ownedBadges = new ArrayList<>();
+        List<BadgeDto> unownedBadges = new ArrayList<>();
+
+        for (Badge badge : allBadges) {
+            if (ownedBadgeNumbers.contains(badge.getBadgeNumber())) {
+                ownedBadges.add(new BadgeDto(
+                        badge.getBadgeNumber(),
+                        badge.getBadgeName(),
+                        LocalDateTime.now() // 실제 획득 날짜가 있다면 UserBadge에서 가져와야 함
+                ));
+            } else {
+                unownedBadges.add(new BadgeDto(
+                        badge.getBadgeNumber(),
+                        badge.getBadgeName(),
+                        null // 보유하지 않은 뱃지는 획득 날짜 없음
+                ));
+            }
+        }
+
+        // 결과 반환
+        return new UserResponseDto(user.getUserId(), user.getUserName(), ownedBadges, unownedBadges);
     }
 
     // 주택청약 페이지 방문 시 호출되는 메서드
@@ -53,27 +76,33 @@ public class BadgeService {
 
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
 
-        // Redis에서 방문 횟수 증가
-        Integer redisVisitCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
+        Integer redisUsageCount = Optional.ofNullable(operations.get(eventKey))
+                .map(Object::toString)
+                .map(Integer::valueOf)
+                .orElse(0);
 
-        // dbCountKey 값이 없다면 DB에서 조회하여 초기화
-        Integer dbVisitCount = (Integer) operations.get(dbCountKey);
-        if (dbVisitCount == null) {
+        operations.increment(eventKey, 1);
+
+        Integer dbUsageCount = Optional.ofNullable(operations.get(dbCountKey))
+            .map(Object::toString)
+            .map(Integer::valueOf)
+            .orElseGet(() -> {
+                User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+                int count = user.getCalendarUsageCount();
+                operations.set(dbCountKey, count, 1, TimeUnit.DAYS); // 하루 동안 유지
+                return count;
+            });
+
+        // DB와 Redis의 사용 횟수를 합산
+        int totalUsageCount = dbUsageCount + redisUsageCount+1;
+
+        checkAndAssignBadge(userId, totalUsageCount, "pageVisit");
+
+        if (totalUsageCount == 1 || totalUsageCount == 10 || totalUsageCount == 50 || totalUsageCount == 100) {
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-            dbVisitCount = user.getPageVisitCount();
-            operations.set(dbCountKey, dbVisitCount, 1, TimeUnit.DAYS); // 하루 동안 유지
-        }
-        // DB와 Redis의 카운트를 합산하여 조건 체크
-        int totalVisitCount = Optional.ofNullable(dbVisitCount).orElse(0) + redisVisitCount;
-        checkAndAssignBadge(userId, totalVisitCount, "pageVisit");
-
-
-//         조건 만족 시 DB와 Redis의 dbCountKey를 업데이트
-        if (totalVisitCount == 1 || totalVisitCount == 10 || totalVisitCount == 50 || totalVisitCount == 100) {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-            user.setPageVisitCount(totalVisitCount);
+            user.setPageVisitCount(totalUsageCount);
             userRepository.save(user);
-            operations.set(dbCountKey, totalVisitCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
+            operations.set(dbCountKey, totalUsageCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
             redisTemplate.delete(eventKey); // event_count 초기화
         }
     }
