@@ -20,44 +20,44 @@ public class HousingController {
     private final HousingService housingService;
 
     @GetMapping("/getAnnouncement")
-    public ResponseEntity<?> getHousingAnnouncement(@RequestParam Integer page, @RequestParam Integer pageSize){
-        HousingResponseDto housingAnnouncements = housingService.getHousingAnnouncements(page, pageSize);
+    public ResponseEntity<?> getHousingAnnouncement(@RequestParam Integer page, @RequestParam Integer pageSize, @RequestParam Long userId){
+        HousingResponseDto housingAnnouncements = housingService.getHousingAnnouncements(page, pageSize, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getAnnouncementLike")
-    public ResponseEntity<?> getHousingAnnouncementLike(@RequestParam Integer page, @RequestParam Integer pageSize, @RequestParam Integer userId){
+    public ResponseEntity<?> getHousingAnnouncementLike(@RequestParam Integer page, @RequestParam Integer pageSize, @RequestParam Long userId){
         HousingResponseDto housingAnnouncements = housingService.getHousingAnnouncementsLike(page, pageSize, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getMonthlyAnnouncement")
-    public ResponseEntity<?> getMonthlyHousingAnnouncement(@RequestParam Integer year, @RequestParam Integer month) {
-        HousingMonthlyResponseDto housingAnnouncements = housingService.getHousingMonthlyAnnouncements(year, month);
+    public ResponseEntity<?> getMonthlyHousingAnnouncement(@RequestParam Integer year, @RequestParam Integer month, @RequestParam Long userId) {
+        HousingMonthlyResponseDto housingAnnouncements = housingService.getHousingMonthlyAnnouncements(year, month, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getMonthlyAnnouncementLike")
-    public ResponseEntity<?> getMonthlyHousingAnnouncementLike(@RequestParam Integer year, @RequestParam Integer month, @RequestParam Integer userId) {
+    public ResponseEntity<?> getMonthlyHousingAnnouncementLike(@RequestParam Integer year, @RequestParam Integer month, @RequestParam Long userId) {
         HousingMonthlyResponseDto housingAnnouncements = housingService.getHousingMonthlyAnnouncementsLike(year, month, userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getMappedAnnouncement")
-    public ResponseEntity<?> getMappedHousingAnnouncement() {
-        HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncements();
+    public ResponseEntity<?> getMappedHousingAnnouncement(@RequestParam Long userId) {
+        HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncements(userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getMappedAnnouncementLike")
-    public ResponseEntity<?> getMappedHousingAnnouncementLike(@RequestParam Integer userId){
+    public ResponseEntity<?> getMappedHousingAnnouncementLike(@RequestParam Long userId){
         HousingMappedResponseDto housingAnnouncements = housingService.getHousingMappedAnnouncementsLike(userId);
         return ResponseEntity.ok(housingAnnouncements);
     }
 
     @GetMapping("/getAnnouncementDetail")
-    public ResponseEntity<?> getAnnouncementDetail(@RequestParam String pblancNo, @RequestParam String houseManageNo){
-        HousingDetailResponseDto announcementDetail = housingService.getHousingAnnouncementDetail(pblancNo, houseManageNo);
+    public ResponseEntity<?> getAnnouncementDetail(@RequestParam String pblancNo, @RequestParam String houseManageNo, @RequestParam Long userId){
+        HousingDetailResponseDto announcementDetail = housingService.getHousingAnnouncementDetail(pblancNo, houseManageNo, userId);
         return ResponseEntity.ok(announcementDetail);
     }
 }

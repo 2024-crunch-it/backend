@@ -59,6 +59,7 @@ public class HousingAnnouncementDto {
     private String npln_prvopr_public_house_at; // 수도권 내 민영 공공주택지구
     private String public_house_spclm_applc_apt; // 공공주택 특별법 적용 여부
     private String pblanc_url;                  // 공고 URL
+    private Boolean isLiked;
 
     private List<HousingModelDto> house_models;
 }

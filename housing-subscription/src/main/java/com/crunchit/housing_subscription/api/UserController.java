@@ -17,15 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final BadgeService badgeService;
-    private final AccountService accountService;
     private final UserService userService;
-
-    @Operation(summary = "사용자 보유 계좌 조회", description = "사용자 보유 모든 계좌 반환")
-    @GetMapping("accounts")
-    public ResponseEntity<?> getAccountsByUserId(@Parameter(description = "사용자 ID")
-                                                                @RequestParam(name = "userId") Long userId) {
-        return new ResponseEntity<>(accountService.getAccountsByUserId(userId), HttpStatus.OK);
-    }
 
     @Operation(summary = "사용자 보유 뱃지 조회", description = "사용자의 아이디와 이름 그리고 보유하고 있는 배지 종류를 반환")
     @GetMapping("/badges")
@@ -41,16 +33,6 @@ public class UserController {
             @RequestParam(name = "userId") Long userId) {
         badgeService.incrementPageVisit(userId);
         return new ResponseEntity<>("page visit ok", HttpStatus.OK);
-    }
-
-
-    @Operation(summary = "청약 납입", description = "사용자의 청약 납입 횟수를 1 증가시키고, 금액 납입, 조건 충족 시 뱃지 지급")
-    @PostMapping("/deposit")
-    public ResponseEntity<?> incrementDeposit(
-            @Parameter(description = "사용자 ID, 계좌 ID, 납입 금액")
-            @RequestParam(name = "userId") Long userId, Long accountId, int depositAmount) {
-        badgeService.incrementDeposit(userId, accountId, depositAmount);
-        return new ResponseEntity<>("deposit ok", HttpStatus.OK);
     }
 
     @Operation(summary = "캘린더 기능 사용 횟수 증가", description = "사용자의 캘린더 기능 사용 횟수를 1 증가시키고 조건 충족 시 뱃지 지급")
@@ -98,13 +80,5 @@ public class UserController {
                                                @RequestParam Long userId) {
         int badgeCount = userService.getUserBadgeCount(userId);
         return new ResponseEntity<>(badgeCount, HttpStatus.OK);
-    }
-
-    @GetMapping("/accounts-balance-total")
-    @Operation(summary = "사용자의 계좌 잔액 총합 조회", description = "특정 사용자의 모든 계좌 잔액 총합을 반환")
-    public ResponseEntity<?> getTotalAccountBalance(@Parameter(description = "사용자 ID")
-                                                        @RequestParam Long userId) {
-        double totalBalance = userService.getTotalAccountBalance(userId);
-        return new ResponseEntity<>(totalBalance, HttpStatus.OK);
     }
 }

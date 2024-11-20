@@ -9,5 +9,6 @@ import java.util.List;
 public class UserResponseDto {
     private Long userId;
     private String userName;
-    private List<BadgeDto> badges;
+    private List<BadgeDto> ownedBadges;        // 보유한 뱃지 리스트
+    private List<BadgeDto> unownedBadges;     // 보유하지 않은 뱃지 리스트
 }
