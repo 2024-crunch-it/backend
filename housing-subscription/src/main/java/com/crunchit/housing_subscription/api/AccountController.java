@@ -33,7 +33,7 @@ public class AccountController {
     @PostMapping("/deposit")
     public ResponseEntity<?> incrementDeposit(
             @Parameter(description = "사용자 ID, 계좌 ID, 납입 금액")
-            @RequestParam(name = "userId") Long userId, Long accountId, int depositAmount) {
+            @RequestParam(name = "userId") Long userId, @RequestParam(name = "accountId") Long accountId, @RequestParam(name = "depositAmount") int depositAmount) {
         badgeService.incrementDeposit(userId, accountId, depositAmount);
         return new ResponseEntity<>("deposit ok", HttpStatus.OK);
     }
