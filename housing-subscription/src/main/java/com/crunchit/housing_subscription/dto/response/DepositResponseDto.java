@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class BadgeDto {
-    private int badgeNumber;
-    private String badgeName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDateTime receiveDate;
+public class DepositResponseDto {
+    private Long depositId;
+    private int depositAmount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd")
+    private LocalDateTime depositDate;
 }

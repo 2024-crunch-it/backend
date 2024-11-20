@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "tbl_account")
 @Getter
@@ -23,8 +25,8 @@ public class Account {
     @Column(name = "balance", nullable = false)
     private double balance;
 
-    @Column(name = "deposit_count", nullable = false)
-    private int depositCount;
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deposit> deposits;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

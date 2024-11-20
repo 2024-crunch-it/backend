@@ -23,19 +23,19 @@ public class User {
     @Column(name = "user_name", nullable = false)
     private String userName;
 
-    @Column(name = "page_visit_count", nullable = false)
+    @Column(name = "page_visit_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int pageVisitCount;
 
-    @Column(name = "bookmark_count", nullable = false)
+    @Column(name = "bookmark_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int bookmarkCount;
 
-    @Column(name = "calendar_usage_count", nullable = false)
+    @Column(name = "calendar_usage_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int calendarUsageCount;
 
-    @Column(name = "custom_alert_usage_count", nullable = false)
+    @Column(name = "custom_alert_usage_count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int customAlertUsageCount;
 
-    @Column(name = "desired_area", nullable = false)
+    @Column(name = "desired_area", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int desiredArea;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

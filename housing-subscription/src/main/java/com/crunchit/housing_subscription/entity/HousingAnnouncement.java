@@ -169,6 +169,6 @@ public class HousingAnnouncement {
     @OneToMany(mappedBy = "housingAnnouncement", cascade = CascadeType.ALL)
     private List<HousingAnnouncementModel> models = new ArrayList<>();
 
-    @OneToMany(mappedBy = "housingAnnouncement", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "housingAnnouncement", cascade = CascadeType.ALL)
     private Set<UserSubscriptionLike> likes = new HashSet<>();
 }

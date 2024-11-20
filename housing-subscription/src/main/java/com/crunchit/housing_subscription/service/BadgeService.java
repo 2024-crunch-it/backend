@@ -4,17 +4,16 @@ import com.crunchit.housing_subscription.dto.response.BadgeDto;
 import com.crunchit.housing_subscription.dto.response.UserResponseDto;
 import com.crunchit.housing_subscription.entity.Account;
 import com.crunchit.housing_subscription.entity.Badge;
+import com.crunchit.housing_subscription.entity.Deposit;
 import com.crunchit.housing_subscription.entity.User;
-import com.crunchit.housing_subscription.repository.AccountRepository;
-import com.crunchit.housing_subscription.repository.BadgeRepository;
-import com.crunchit.housing_subscription.repository.UserBadgeRepository;
-import com.crunchit.housing_subscription.repository.UserRepository;
+import com.crunchit.housing_subscription.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +28,7 @@ public class BadgeService {
     private final AccountRepository accountRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final NotificationService notificationService;
+    private final DepositRepository depositRepository;
 
     @Transactional(readOnly = true)
     public UserResponseDto getUserWithBadges(Long userId) {
@@ -38,7 +38,8 @@ public class BadgeService {
         List<BadgeDto> badgeDtos = user.getUserBadges().stream()
                 .map(userBadge -> new BadgeDto(
                         userBadge.getBadge().getBadgeNumber(),
-                        userBadge.getBadge().getBadgeName()
+                        userBadge.getBadge().getBadgeName(),
+                        LocalDateTime.now()
                 ))
                 .collect(Collectors.toList());
 
@@ -78,46 +79,28 @@ public class BadgeService {
     }
 
     // 청약 납입 호출 메서드
+    @Transactional
     public void incrementDeposit(Long userId, Long accountId, int depositAmount) {
-        // Redis 키 구성
-        String eventKey = "account:" + accountId + ":deposit";
-        String dbCountKey = "account:" + accountId + ":dbDeposit";
 
-        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-
-        // 계좌 조회 및 유효성 확인
+        // 계좌 조회
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        if (!account.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("Account does not belong to the user");
-        }
+                .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
 
-        // Redis에서 납입 횟수 증가
-        Integer redisDepositCount = Math.toIntExact(operations.increment(eventKey, 1)); // Long -> Integer 변환
+        // 입금 기록 생성
+        Deposit deposit = Deposit.builder()
+                .account(account)
+                .depositAmount(depositAmount)
+                .depositDate(LocalDateTime.now())
+                .build();
 
-        // dbCountKey 값이 없다면 DB에서 초기화
-        Integer dbDepositCount = (Integer) operations.get(dbCountKey);
-        if (dbDepositCount == null) {
-            dbDepositCount = account.getDepositCount(); // account 테이블에서 납입 횟수 조회
-            operations.set(dbCountKey, dbDepositCount, 1, TimeUnit.DAYS); // 하루 동안 유지
-        }
+        depositRepository.save(deposit);
 
-        // DB와 Redis의 납입 횟수 합산
-        int totalDepositCount = Optional.ofNullable(dbDepositCount).orElse(0) + redisDepositCount;
-
-        // 뱃지 확인 및 할당
-        checkAndAssignBadge(userId, totalDepositCount, "deposit");
-
-        // 조건 만족 시 DB와 Redis의 dbCountKey를 업데이트
-        if (totalDepositCount == 1 || totalDepositCount == 10 || totalDepositCount == 50 || totalDepositCount == 100) {
-            account.setDepositCount(totalDepositCount); // 납입 횟수 업데이트
-            operations.set(dbCountKey, totalDepositCount, 1, TimeUnit.DAYS); // 업데이트된 db_count로 Redis 초기화
-            redisTemplate.delete(eventKey); // event_count 초기화
-        }
-
-        // 잔액 업데이트
+        // 계좌 잔액 업데이트
         account.setBalance(account.getBalance() + depositAmount);
-        accountRepository.save(account);
+        accountRepository.save(account); // 변경 감지에 의해 자동으로 업데이트되지만 명시적으로 저장
+
+        // 납입 크기를 count에 넣어서 뱃지 수여 여부 체크
+        checkAndAssignBadge(userId, account.getDeposits().size(), "deposit");
     }
 
     // 청약 캘린더 기능 사용 횟수 증가 메서드
