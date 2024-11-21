@@ -37,7 +37,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public List<DepositResponseDto> getDepositsByAccountId(Long accountId) {
-        List<Deposit> deposits = depositRepository.findAllByAccount_AccountId(accountId);
+        List<Deposit> deposits = depositRepository.findAllByAccount_AccountIdOrderByDepositDateDesc(accountId);
 
         // 엔티티를 DTO로 변환
         return deposits.stream()
