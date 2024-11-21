@@ -63,6 +63,11 @@ public class NotificationScheduleService {
         }
     }
 
+    // public 메소드 추가
+    public void deleteNotificationSchedules(User user, HousingAnnouncement announcement) {
+        deleteExistingSchedules(user, announcement);
+    }
+
     // 기존 스케줄 삭제
     private void deleteExistingSchedules(User user, HousingAnnouncement announcement) {
         notificationScheduleRepository.deleteByUserAndHousingAnnouncement(user, announcement);

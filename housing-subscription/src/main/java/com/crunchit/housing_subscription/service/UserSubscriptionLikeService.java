@@ -74,6 +74,10 @@ public class UserSubscriptionLikeService {
                 .orElseThrow(() -> new RuntimeException("Wishlist item not found"));
 
         likeRepository.delete(like);
+
+        // 찜 삭제 시 해당 알림 스케줄 삭제
+        notificationScheduleService.deleteNotificationSchedules(user, announcement);
+
         decrementBookmarkCount(userId);
     }
 
