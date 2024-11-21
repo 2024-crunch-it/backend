@@ -254,10 +254,12 @@ public class BadgeService {
                     if (badge.getBadgeName().equals("청약 캘린더 마스터") && count == 10) {
                         shouldAssignBadge = true;
                     }
+                    break;
                 case "alert":
                     if (badge.getBadgeName().equals("맞춤 알림 활용자") && count == 10) {
                         shouldAssignBadge = true;
                     }
+                    break;
             }
 
             // 조건을 만족하면 뱃지를 사용자에게 할당
