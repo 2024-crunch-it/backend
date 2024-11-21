@@ -41,7 +41,7 @@ public class AccountController {
     @GetMapping("/accounts-balance-total")
     @Operation(summary = "사용자의 계좌 잔액 총합 조회", description = "특정 사용자의 모든 계좌 잔액 총합을 반환")
     public ResponseEntity<?> getTotalAccountBalance(@Parameter(description = "사용자 ID")
-                                                    @RequestParam Long userId) {
+                                                    @RequestParam("userId") Long userId) {
         double totalBalance = userService.getTotalAccountBalance(userId);
         return new ResponseEntity<>(totalBalance, HttpStatus.OK);
     }
@@ -49,7 +49,7 @@ public class AccountController {
     @Operation(summary = "청약 납입 리스트", description = "사용자의 특정 계좌 청약 납입 기록 조회")
     @GetMapping("/deposits")
     public ResponseEntity<List<DepositResponseDto>> getDepositsByAccountId(@Parameter(description = "계좌 ID")
-                                                                            @RequestParam Long accountId) {
+                                                                            @RequestParam("accountId") Long accountId) {
         List<DepositResponseDto> depositList = accountService.getDepositsByAccountId(accountId);
         return ResponseEntity.ok(depositList);
     }

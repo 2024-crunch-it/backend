@@ -47,7 +47,7 @@ public class UserController {
     @Operation(summary = "사용자 청약 희망 면적 조회", description = "desiredArea 값 0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
     @GetMapping("/desired-area")
     public ResponseEntity<?> getDesiredAreaByUserId(@Parameter(description = "사용자 ID")
-                                                 @RequestParam Long userId) {
+                                                 @RequestParam("userId") Long userId) {
         return new ResponseEntity<>(userService.getDesiredAreaByUser(userId), HttpStatus.OK);
     }
 
@@ -55,7 +55,7 @@ public class UserController {
     @PutMapping("desired-area")
     public ResponseEntity<?> updateDesiredArea(
             @Parameter(description = "사용자 ID")
-            @RequestParam Long userId,
+            @RequestParam("userId") Long userId,
             @Parameter(description = "0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
             @RequestParam int desiredArea) {
 
@@ -68,7 +68,7 @@ public class UserController {
     @GetMapping("/badge-count")
     @Operation(summary = "사용자의 뱃지 개수 조회", description = "특정 사용자가 보유한 뱃지의 개수를 반환")
     public ResponseEntity<?> getBadgeCount(@Parameter(description = "사용자 ID")
-                                               @RequestParam Long userId) {
+                                               @RequestParam("userId") Long userId) {
         int badgeCount = userService.getUserBadgeCount(userId);
         return new ResponseEntity<>(badgeCount, HttpStatus.OK);
     }
