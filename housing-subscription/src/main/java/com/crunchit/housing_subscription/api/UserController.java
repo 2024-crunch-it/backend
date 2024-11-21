@@ -57,7 +57,7 @@ public class UserController {
             @Parameter(description = "사용자 ID")
             @RequestParam("userId") Long userId,
             @Parameter(description = "0:모든면적, 1:85제곱미터, 2:102제곱미터, 3:135제곱미터 이하")
-            @RequestParam int desiredArea) {
+            @RequestParam("desiredArea") int desiredArea) {
 
         // 서비스 호출
         userService.updateDesiredArea(userId, desiredArea);
