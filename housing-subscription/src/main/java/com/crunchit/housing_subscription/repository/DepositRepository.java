@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DepositRepository extends JpaRepository<Deposit, Long> {
-    // 특정 계좌의 입금 내역 조회
-    List<Deposit> findAllByAccount_AccountId(Long accountId);
+    // 특정 Account ID에 속하는 Deposit 데이터를 depositDate 기준 내림차순 정렬
+    List<Deposit> findAllByAccount_AccountIdOrderByDepositDateDesc(Long accountId);
 }

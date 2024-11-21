@@ -98,7 +98,7 @@ public class BadgeService {
 
         checkAndAssignBadge(userId, totalUsageCount, "pageVisit");
 
-        if (totalUsageCount == 1 || totalUsageCount == 10 || totalUsageCount == 50 || totalUsageCount == 100) {
+        if (totalUsageCount == 2 || totalUsageCount == 10 || totalUsageCount == 50 || totalUsageCount == 100) {
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             user.setPageVisitCount(totalUsageCount);
             userRepository.save(user);
@@ -229,7 +229,7 @@ public class BadgeService {
             // 타입에 따라 조건 체크
             switch (type) {
                 case "pageVisit":
-                    if (badge.getBadgeName().equals("첫 발걸음") && count == 1) {
+                    if (badge.getBadgeName().equals("첫 발걸음") && count == 2) {
                         shouldAssignBadge = true;
                     } else if (badge.getBadgeName().equals("꾸준한 관심") && count == 10) {
                         shouldAssignBadge = true;
