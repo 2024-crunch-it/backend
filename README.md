@@ -83,7 +83,7 @@
 
 ## 아키텍처
 
-<img src="https://github.com/user-attachments/assets/24b56e7a-1faf-4e67-8a47-0f286251c978"/>
+<img src="https://github.com/user-attachments/assets/d865bab8-6e11-4c69-9a12-8242e459ebba"/>
 
 <br>
 <br>
